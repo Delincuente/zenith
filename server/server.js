@@ -30,7 +30,8 @@ app.get('/', (req, res) => {
 app.use('/api', routes);
 
 // Error handling middleware
-const errorHandler = require('./middlewares/errorHandler');
+const { notFound, errorHandler } = require('./middlewares/errorHandler');
+app.use(notFound);
 app.use(errorHandler);
 
 
