@@ -20,6 +20,7 @@ app.use(cookieParser());
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
+const clientRoutes = require('./routes/clientRoutes');
 
 // Root route
 app.get('/', (req, res) => {
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/clients', clientRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
