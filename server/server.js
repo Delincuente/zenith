@@ -19,10 +19,7 @@ app.use(cookieParser());
 
 
 // Routes
-const authRoutes = require('./routes/authRoutes');
-const clientRoutes = require('./routes/clientRoutes');
-const projectRoutes = require('./routes/projectRoutes');
-const taskRoutes = require('./routes/taskRoutes');
+const routes = require('./routes');
 
 // Root route
 app.get('/', (req, res) => {
@@ -30,10 +27,7 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/tasks', taskRoutes);
+app.use('/api', routes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
