@@ -18,10 +18,16 @@ app.use(cookieParser());
 
 
 
+// Routes
+const authRoutes = require('./routes/authRoutes');
+
 // Root route
 app.get('/', (req, res) => {
   res.json({ message: 'SaaS Project Management API is running' });
 });
+
+// API Routes
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
