@@ -1,102 +1,53 @@
-const db = require('../models');
-const { logActivity } = require('../services/activityService');
+const taskService = require('../services/taskService');
 
-// Get all tasks for user's projects
-exports.getTasks = async (req, res) => {
+/**
+ * GET /api/tasks
+ * Get all tasks belonging to the authenticated user's projects.
+ */
+exports.getTasks = async (req, res, next) => {
   try {
-    const { status, search } = req.query;
-    
-    const where = {};
-    if (status) where.status = status;
-    if (search) {
-      where.title = { [db.Sequelize.Op.like]: `%${search}%` };
-    }
-
-    const tasks = await db.Task.findAll({
-      include: [
-        {
-          model: db.Project,
-          where: { user_id: req.user.id },
-          attributes: ['title']
-        }
-      ],
-      where,
-      order: [['created_at', 'DESC']]
-    });
-
+    const tasks = await taskService.getTasks(req.query, req.user.id);
     res.json(tasks);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.createTask = async (req, res) => {
+/**
+ * POST /api/tasks
+ * Create a new task under one of the user's projects.
+ */
+exports.createTask = async (req, res, next) => {
   try {
-    const { project_id, title, description, assigned_to } = req.body;
-    
-    // Check if project exists and belongs to user
-    const project = await db.Project.findOne({ where: { id: project_id, user_id: req.user.id } });
-    if (!project) return res.status(404).json({ message: 'Project not found' });
-
-    const task = await db.Task.create({
-      project_id,
-      title,
-      description,
-      assigned_to,
-    });
-
-    await logActivity(req.user.id, 'Created Task', 'Task', task.id);
-
-    // Notify via socket (implemented later)
-    if (global.io) {
-      global.io.to(`project_${project_id}`).emit('taskCreated', task);
-    }
-
+    const task = await taskService.createTask(req.body, req.user.id);
     res.status(201).json(task);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.updateTask = async (req, res) => {
+/**
+ * PUT /api/tasks/:id
+ * Update an existing task.
+ */
+exports.updateTask = async (req, res, next) => {
   try {
-    const task = await db.Task.findByPk(req.params.id, {
-      include: [{ model: db.Project, where: { user_id: req.user.id } }]
-    });
-
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-
-    await task.update(req.body);
-    await logActivity(req.user.id, 'Updated Task', 'Task', task.id);
-
-    if (global.io) {
-      global.io.to(`project_${task.project_id}`).emit('taskUpdated', task);
-    }
-
+    const task = await taskService.updateTask(req.params.id, req.body, req.user.id);
     res.json(task);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.deleteTask = async (req, res) => {
+/**
+ * DELETE /api/tasks/:id
+ * Delete a task by ID.
+ */
+exports.deleteTask = async (req, res, next) => {
   try {
-    const task = await db.Task.findByPk(req.params.id, {
-      include: [{ model: db.Project, where: { user_id: req.user.id } }]
-    });
-
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-
-    const projectId = task.project_id;
-    await task.destroy();
-    await logActivity(req.user.id, 'Deleted Task', 'Task', req.params.id);
-
-    if (global.io) {
-      global.io.to(`project_${projectId}`).emit('taskDeleted', req.params.id);
-    }
-
+    await taskService.deleteTask(req.params.id, req.user.id);
     res.json({ message: 'Task deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

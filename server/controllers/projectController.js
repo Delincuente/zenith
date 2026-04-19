@@ -1,118 +1,66 @@
-const db = require('../models');
-const { logActivity } = require('../services/activityService');
+const projectService = require('../services/projectService');
 
-// Create Project
-exports.createProject = async (req, res) => {
+/**
+ * POST /api/projects
+ * Create a new project for the authenticated user.
+ */
+exports.createProject = async (req, res, next) => {
   try {
-    const { title, description, client_id, deadline } = req.body;
-    
-    // Verify client belongs to user
-    const client = await db.Client.findOne({ where: { id: client_id, user_id: req.user.id } });
-    if (!client) return res.status(404).json({ message: 'Selected client not found.' });
-
-    const project = await db.Project.create({
-      title,
-      description,
-      client_id,
-      deadline,
-      user_id: req.user.id,
-    });
-
-    await logActivity(req.user.id, 'Created Project', 'Project', project.id);
-
+    const project = await projectService.createProject(req.body, req.user.id);
     res.status(201).json(project);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Get All Projects (with pagination and filtering)
-exports.getProjects = async (req, res) => {
+/**
+ * GET /api/projects
+ * Get a paginated, filtered list of the user's projects.
+ */
+exports.getProjects = async (req, res, next) => {
   try {
-    const { status, search, page = 1, limit = 10 } = req.query;
-    const offset = (page - 1) * limit;
-
-    const where = { user_id: req.user.id };
-    if (status) where.status = status;
-    if (search) {
-      where.title = { [db.Sequelize.Op.like]: `%${search}%` };
-    }
-
-    const projects = await db.Project.findAndCountAll({
-      where,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      order: [['created_at', 'DESC']],
-      include: [
-        { model: db.Client, attributes: ['company_name'] },
-        { model: db.Task, attributes: ['id', 'status'] },
-      ],
-    });
-
-    res.json({
-      data: projects.rows,
-      total: projects.count,
-      pages: Math.ceil(projects.count / limit),
-      currentPage: parseInt(page),
-    });
+    const result = await projectService.getProjects(req.query, req.user.id);
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Get Project Details
-exports.getProjectById = async (req, res) => {
+/**
+ * GET /api/projects/:id
+ * Get full details of a single project.
+ */
+exports.getProjectById = async (req, res, next) => {
   try {
-    const project = await db.Project.findOne({
-      where: { id: req.params.id, user_id: req.user.id },
-      include: [
-        { model: db.Client },
-        { model: db.Task },
-        { model: db.Comment, include: [{ model: db.User, attributes: ['name'] }] },
-        { model: db.Payment },
-      ],
-    });
-
-    if (!project) return res.status(404).json({ message: 'Project not found' });
-
+    const project = await projectService.getProjectById(req.params.id, req.user.id);
     res.json(project);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Update Project
-exports.updateProject = async (req, res) => {
+/**
+ * PUT /api/projects/:id
+ * Update an existing project.
+ */
+exports.updateProject = async (req, res, next) => {
   try {
-    const project = await db.Project.findOne({
-      where: { id: req.params.id, user_id: req.user.id },
-    });
-
-    if (!project) return res.status(404).json({ message: 'Project not found' });
-
-    await project.update(req.body);
-    await logActivity(req.user.id, 'Updated Project', 'Project', project.id);
-
+    const project = await projectService.updateProject(req.params.id, req.body, req.user.id);
     res.json(project);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Delete Project
-exports.deleteProject = async (req, res) => {
+/**
+ * DELETE /api/projects/:id
+ * Delete a project by ID.
+ */
+exports.deleteProject = async (req, res, next) => {
   try {
-    const project = await db.Project.findOne({
-      where: { id: req.params.id, user_id: req.user.id },
-    });
-
-    if (!project) return res.status(404).json({ message: 'Project not found' });
-
-    await project.destroy();
-    await logActivity(req.user.id, 'Deleted Project', 'Project', req.params.id);
-
+    await projectService.deleteProject(req.params.id, req.user.id);
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

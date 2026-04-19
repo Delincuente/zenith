@@ -9,6 +9,9 @@ const notFound = (req, res, next) => {
 
 /**
  * Global Error Handling Middleware
+ *
+ * Handles both AppError instances (thrown from services) and
+ * unexpected runtime errors, normalising the response shape.
  */
 const errorHandler = (err, req, res, next) => {
   console.error('Error Details:', {
@@ -18,16 +21,19 @@ const errorHandler = (err, req, res, next) => {
     method: req.method,
   });
 
-  // Default error status and message
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 
-  res.status(statusCode).json({
+  const response = {
     success: false,
     message,
+    // Include validation errors array if present (from validate middleware)
+    ...(err.errors && { errors: err.errors }),
     // Include stack trace only in non-production environments
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-  });
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+  };
+
+  res.status(statusCode).json(response);
 };
 
 module.exports = { notFound, errorHandler };
