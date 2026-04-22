@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const projectController = require('../controllers/projectController');
-const projectValidator = require('../middlewares/projectValidator');
+const validators = require('../middlewares/validators');
 
 /**
  * @route   POST /api/projects
@@ -10,7 +10,7 @@ const projectValidator = require('../middlewares/projectValidator');
  */
 router.post(
   '/',
-  projectValidator.createProject,
+  validators.project.createProject,
   projectController.createProject
 );
 

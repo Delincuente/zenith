@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const taskController = require('../controllers/taskController');
-const taskValidator = require('../middlewares/taskValidator');
+const validators = require('../middlewares/validators');
 
 /**
  * @route   POST /api/tasks
@@ -10,7 +10,7 @@ const taskValidator = require('../middlewares/taskValidator');
  */
 router.post(
   '/',
-  taskValidator.createTask,
+  validators.task.createTask,
   taskController.createTask
 );
 

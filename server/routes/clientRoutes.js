@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const clientController = require('../controllers/clientController');
-const clientValidator = require('../middlewares/clientValidator');
+const validators = require('../middlewares/validators');
 
 // NOTE: These routes should be protected by an auth middleware
 // router.use(auth); 
@@ -13,7 +13,7 @@ const clientValidator = require('../middlewares/clientValidator');
  */
 router.post(
   '/',
-  clientValidator.createClient,
+  validators.client.createClient,
   clientController.createClient
 );
 
