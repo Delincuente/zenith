@@ -60,3 +60,20 @@ exports.logout = async (req, res, next) => {
     next(error);
   }
 };
+/**
+ * GET /api/auth/me
+ * Get current authenticated user profile.
+ */
+exports.getMe = async (req, res, next) => {
+  try {
+    const user = {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+    };
+    res.json({ user });
+  } catch (error) {
+    next(error);
+  }
+};

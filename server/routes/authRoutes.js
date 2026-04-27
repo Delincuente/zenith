@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const validators = require('../middlewares/validators');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 /**
  * @route   POST /api/auth/register
@@ -35,8 +36,14 @@ router.post('/refresh-token', authController.refreshToken);
 /**
  * @route   POST /api/auth/logout
  * @desc    Logout user & clear cookie
- * @access  Public
  */
 router.post('/logout', authController.logout);
+
+/**
+ * @route   GET /api/auth/me
+ * @desc    Get current user profile
+ * @access  Private
+ */
+router.get('/me', authMiddleware, authController.getMe);
 
 module.exports = router;
