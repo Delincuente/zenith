@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import useAuthStore from '../store/useAuthStore';
 import { 
   Briefcase, 
   CheckSquare, 
@@ -33,7 +33,7 @@ const StatCard = ({ title, value, icon: Icon, color, trend }) => (
 );
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [stats, setStats] = useState({
     activeProjects: 12,
     pendingTasks: 45,
