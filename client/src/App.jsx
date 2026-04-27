@@ -8,6 +8,9 @@ import PageWrapper from './components/PageWrapper';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Projects from './pages/Projects';
+import Tasks from './pages/Tasks';
+import Clients from './pages/Clients';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -20,6 +23,9 @@ const AnimatedRoutes = () => {
 
         <Route path="/" element={<Layout />}>
           <Route index element={<PageWrapper><Dashboard /></PageWrapper>} />
+          <Route path="projects" element={<PageWrapper><Projects /></PageWrapper>} />
+          <Route path="tasks" element={<PageWrapper><Tasks /></PageWrapper>} />
+          <Route path="clients" element={<PageWrapper><Clients /></PageWrapper>} />
         </Route>
       </Routes>
     </AnimatePresence>

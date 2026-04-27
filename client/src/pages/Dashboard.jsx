@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Briefcase,
-  CheckSquare,
-  DollarSign,
+import { useAuth } from '../context/AuthContext';
+import { 
+  Briefcase, 
+  CheckSquare, 
+  DollarSign, 
   Activity,
   ExternalLink,
   ChevronRight,
@@ -12,7 +13,7 @@ import {
 const StatCard = ({ title, value, icon: Icon, color, trend }) => (
   <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl hover:border-slate-700 transition-all group relative overflow-hidden">
     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent -mr-8 -mt-8 rounded-full blur-2xl group-hover:bg-white/10 transition-colors" />
-
+    
     <div className="flex justify-between items-start mb-3 md:mb-5 relative z-10">
       <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg ${color} bg-opacity-10`}>
         <Icon size={20} className={`${color.replace('bg-', 'text-')} md:w-6 md:h-6`} />
@@ -23,7 +24,7 @@ const StatCard = ({ title, value, icon: Icon, color, trend }) => (
         </span>
       )}
     </div>
-
+    
     <div className="relative z-10">
       <h3 className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-1.5">{title}</h3>
       <p className="text-2xl md:text-3xl font-black text-white tracking-tighter">{value}</p>
@@ -47,7 +48,7 @@ const Dashboard = () => {
           <h2 className="text-2xl md:text-4xl font-black text-white mb-1 md:mb-2 tracking-tighter">Workspace Overview</h2>
           <p className="text-slate-400 text-xs md:text-base font-medium">Here's what's happening in your projects today.</p>
         </div>
-
+        
         <div className="flex items-center space-x-3 bg-slate-900 border border-slate-800 px-4 md:px-5 py-2.5 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm self-start md:self-auto shadow-xl shadow-black/20">
           <div className="p-1.5 md:p-2 bg-blue-600/10 text-blue-400 rounded-lg md:rounded-xl">
             <ShieldCheck size={18} className="md:w-5 md:h-5" />
@@ -63,31 +64,31 @@ const Dashboard = () => {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        <StatCard
-          title="Active Projects"
-          value={stats.activeProjects}
-          icon={Briefcase}
+        <StatCard 
+          title="Active Projects" 
+          value={stats.activeProjects} 
+          icon={Briefcase} 
           color="bg-blue-500"
           trend="+2 this month"
         />
-        <StatCard
-          title="Pending Tasks"
-          value={stats.pendingTasks}
-          icon={CheckSquare}
+        <StatCard 
+          title="Pending Tasks" 
+          value={stats.pendingTasks} 
+          icon={CheckSquare} 
           color="bg-amber-500"
           trend="-5 from yesterday"
         />
-        <StatCard
-          title="Total Revenue"
-          value={stats.revenue}
-          icon={DollarSign}
+        <StatCard 
+          title="Total Revenue" 
+          value={stats.revenue} 
+          icon={DollarSign} 
           color="bg-emerald-500"
           trend="+18.2%"
         />
-        <StatCard
-          title="Avg. Completion"
-          value={stats.completionRate}
-          icon={Activity}
+        <StatCard 
+          title="Avg. Completion" 
+          value={stats.completionRate} 
+          icon={Activity} 
           color="bg-purple-500"
         />
       </div>
@@ -100,7 +101,7 @@ const Dashboard = () => {
               View all <ChevronRight size={14} className="ml-1 md:w-4 md:h-4" />
             </button>
           </div>
-
+          
           <div className="space-y-3 md:space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center justify-between p-3 md:p-4 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer group border border-transparent hover:border-slate-700">

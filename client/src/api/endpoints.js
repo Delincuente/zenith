@@ -12,3 +12,19 @@ export const AUTH_ENDPOINTS = {
   REFRESH_TOKEN: '/auth/refresh-token',
   ME: '/auth/me',
 };
+
+export const PROJECT_ENDPOINTS = {
+  BASE: '/projects',
+  BY_ID: (id) => `/projects/${id}`,
+};
+
+export const CLIENT_ENDPOINTS = {
+  BASE: '/clients',
+  BY_ID: (id) => `/clients/${id}`,
+};
+
+export const TASK_ENDPOINTS = {
+  BASE: '/tasks',
+  BY_ID: (id) => `/tasks/${id}`,
+  BY_PROJECT: (projectId) => `/tasks/project/${projectId}`,
+};

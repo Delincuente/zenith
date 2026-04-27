@@ -1,12 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard
+import {
+  LayoutDashboard,
+  Briefcase,
+  CheckSquare,
+  Users,
 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Dashboard', icon: LayoutDashboard, path: '/' }
+  { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { name: 'Projects', icon: Briefcase, path: '/projects' },
+  { name: 'Tasks', icon: CheckSquare, path: '/tasks' },
+  { name: 'Clients', icon: Users, path: '/clients' },
 ];
 
 const BottomNav = () => {
@@ -14,7 +20,7 @@ const BottomNav = () => {
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
       {/* Safe Area Background */}
       <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl border-t border-slate-800" />
-      
+
       <div className="relative flex justify-around items-center h-14 pb-[var(--sab)] px-1">
         {navItems.map((item) => (
           <NavLink
@@ -39,7 +45,7 @@ const BottomNav = () => {
                   )}
                 </div>
                 <span className="text-[9px] font-bold uppercase tracking-tighter transition-all">{item.name}</span>
-                
+
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"

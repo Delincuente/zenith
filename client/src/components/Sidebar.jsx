@@ -2,9 +2,11 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Briefcase,
+  CheckSquare,
+  Users,
   LogOut,
-  Zap,
-  X
+  Zap
 } from 'lucide-react';
 import { useAuthStore } from '../store';
 import { X } from 'lucide-react';
@@ -15,7 +17,10 @@ const Sidebar = ({ onClose }) => {
 
 
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/' }
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { name: 'Projects', icon: Briefcase, path: '/projects' },
+    { name: 'Tasks', icon: CheckSquare, path: '/tasks' },
+    { name: 'Clients', icon: Users, path: '/clients' },
   ];
 
   const handleLogout = async () => {
