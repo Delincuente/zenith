@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import useAuthStore from '../store/useAuthStore';
 import { UserPlus, Mail, Lock, User, AlertCircle, Building, Zap } from 'lucide-react';
 import { validateEmail, validatePassword, validateName } from '../utils/validators';
 
@@ -12,7 +13,8 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const register = useAuthStore((state) => state.register);
+  const loading = useAuthStore((state) => state.isLoading);
   const navigate = useNavigate();
 
 
@@ -35,11 +37,12 @@ const Register = () => {
     }
 
     setFieldErrors({});
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await register(formData);
       navigate('/');
-    }, 500);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed');
+    }
   };
 
 

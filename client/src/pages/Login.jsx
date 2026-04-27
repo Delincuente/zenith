@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import useAuthStore from '../store/useAuthStore';
 import { LogIn, Mail, Lock, AlertCircle, Zap } from 'lucide-react';
 import { validateEmail } from '../utils/validators';
 
@@ -8,7 +9,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const login = useAuthStore((state) => state.login);
+  const loading = useAuthStore((state) => state.isLoading);
   const navigate = useNavigate();
 
 
@@ -27,11 +29,12 @@ const Login = () => {
     }
 
     setFieldErrors({});
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await login(email, password);
       navigate('/');
-    }, 500);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to login');
+    }
   };
 
 

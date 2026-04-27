@@ -1,12 +1,26 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
+import useAuthStore from '../store/useAuthStore';
 import { Zap, User as UserIcon } from 'lucide-react';
 
 const Layout = () => {
+  const { user, isLoading } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const user = { name: "Guest User", role: "client", avatar: null };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-200 overflow-x-hidden">

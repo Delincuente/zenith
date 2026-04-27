@@ -1,21 +1,25 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   LogOut,
   Zap,
   X
 } from 'lucide-react';
+import { useAuthStore } from '../store';
+import { X } from 'lucide-react';
 
 const Sidebar = ({ onClose }) => {
+  const { logout, user } = useAuthStore();
   const navigate = useNavigate();
-  const user = { name: "Guest User", role: "client", avatar: null };
+
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/' }
   ];
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -28,14 +32,14 @@ const Sidebar = ({ onClose }) => {
         <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent tracking-tight">
           Zenith
         </h1>
-        <button 
+        <button
           onClick={onClose}
           className="lg:hidden ml-auto p-2 text-slate-400 hover:text-white transition-colors"
         >
           <X size={20} />
         </button>
       </div>
-      
+
       <nav className="flex-1 px-4 space-y-2">
         {navItems.map((item) => (
           <NavLink

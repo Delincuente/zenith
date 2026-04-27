@@ -32,7 +32,7 @@ const StatCard = ({ title, value, icon: Icon, color, trend }) => (
 );
 
 const Dashboard = () => {
-  const user = { plan: 'Free' };
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     activeProjects: 12,
     pendingTasks: 45,
@@ -56,6 +56,9 @@ const Dashboard = () => {
             <p className="text-[9px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest">Plan</p>
             <p className="text-xs md:text-sm font-black text-white uppercase">{user?.plan || 'Free'}</p>
           </div>
+          <a href="/billing" className="ml-3 p-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">
+            <ChevronRight size={14} className="md:w-4 md:h-4" />
+          </a>
         </div>
       </header>
 

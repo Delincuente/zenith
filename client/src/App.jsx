@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
+import useAuthStore from './store/useAuthStore';
 import Layout from './components/Layout';
 import PageWrapper from './components/PageWrapper';
 import Login from './pages/Login';
@@ -10,13 +11,13 @@ import Dashboard from './pages/Dashboard';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
-  
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         <Route path="/" element={<Layout />}>
           <Route index element={<PageWrapper><Dashboard /></PageWrapper>} />
         </Route>
@@ -26,6 +27,12 @@ const AnimatedRoutes = () => {
 };
 
 function App() {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
     <Router>
       <Toaster position="top-right" toastOptions={{
