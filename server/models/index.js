@@ -40,6 +40,6 @@ db.Task.belongsTo(db.Project, { foreignKey: 'project_id' });
 
 // Task & User (Assignee)
 db.User.hasMany(db.Task, { foreignKey: 'assigned_to' });
-db.Task.belongsTo(db.User, { foreignKey: 'assigned_to', as: 'Assignee' });
+db.Task.belongsTo(db.User, { foreignKey: 'assigned_to', as: 'assignee' });
 
 module.exports = db;
