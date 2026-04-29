@@ -23,7 +23,7 @@ const Layout = () => {
 
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200 overflow-x-hidden">
+    <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden">
       {/* Mobile Top Header (Native Feel) */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-slate-900/50 backdrop-blur-xl border-b border-white/5 z-40 flex items-center justify-between px-5 pt-[var(--sat)]">
         <div className="flex items-center space-x-2.5">
@@ -63,7 +63,7 @@ const Layout = () => {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 w-full lg:overflow-auto pt-20 lg:pt-8 pb-16 lg:pb-8 p-3 md:p-8">
+      <main className="flex-1 w-full overflow-y-auto pt-20 lg:pt-8 pb-16 lg:pb-8 p-3 md:p-8">
         <Outlet />
       </main>
 

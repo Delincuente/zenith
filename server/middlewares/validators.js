@@ -81,6 +81,29 @@ const validators = {
         .isUUID().withMessage('Invalid User ID format for assigned_to'),
     ]),
   },
+
+  user: {
+    updateProfile: validate([
+      body('name')
+        .optional()
+        .trim()
+        .notEmpty().withMessage('Name cannot be empty')
+        .isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters'),
+      body('email')
+        .optional()
+        .trim()
+        .notEmpty().withMessage('Email cannot be empty')
+        .isEmail().withMessage('Please provide a valid email address')
+        .normalizeEmail(),
+    ]),
+    changePassword: validate([
+      body('currentPassword')
+        .notEmpty().withMessage('Current password is required'),
+      body('newPassword')
+        .notEmpty().withMessage('New password is required')
+        .isLength({ min: 6 }).withMessage('New password must be at least 6 characters long'),
+    ]),
+  },
 };
 
 module.exports = validators;

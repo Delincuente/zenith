@@ -3,7 +3,7 @@
  * All API paths should be defined here to avoid hardcoding strings in services.
  */
 
-export const API_BASE_URL = `${import.meta.env.VITE_API_URL}api` || 'http://localhost:5000/api';
+export const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 export const AUTH_ENDPOINTS = {
   LOGIN: '/auth/login',
@@ -27,4 +27,9 @@ export const TASK_ENDPOINTS = {
   BASE: '/tasks',
   BY_ID: (id) => `/tasks/${id}`,
   BY_PROJECT: (projectId) => `/tasks/project/${projectId}`,
+};
+
+export const USER_ENDPOINTS = {
+  PROFILE_UPDATE: '/users/profile',
+  CHANGE_PASSWORD: '/users/change-password',
 };

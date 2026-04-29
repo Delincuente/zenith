@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Tasks from './pages/Tasks';
 import Clients from './pages/Clients';
+import Profile from './pages/Profile';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -26,6 +27,7 @@ const AnimatedRoutes = () => {
           <Route path="projects" element={<PageWrapper><Projects /></PageWrapper>} />
           <Route path="tasks" element={<PageWrapper><Tasks /></PageWrapper>} />
           <Route path="clients" element={<PageWrapper><Clients /></PageWrapper>} />
+          <Route path="profile" element={<PageWrapper><Profile /></PageWrapper>} />
         </Route>
       </Routes>
     </AnimatePresence>

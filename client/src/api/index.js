@@ -10,6 +10,7 @@ import * as endpoints from './endpoints';
 import authService from './services/authService';
 import projectService from './services/projectService';
 import clientService from './services/clientService';
+import userService from './services/userService';
 
 export {
   axiosInstance,
@@ -17,6 +18,7 @@ export {
   authService,
   projectService,
   clientService,
+  userService,
 };
 
 // Default export axios instance for simple cases

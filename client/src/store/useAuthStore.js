@@ -14,10 +14,13 @@ const useAuthStore = create(
       isLoading: true,
       isAuthenticated: false,
 
-      // Actions
       setUser: (user) => set({ user, isAuthenticated: !!user, isLoading: false }),
 
       setLoading: (isLoading) => set({ isLoading }),
+
+      updateUser: (updatedUser) => set((state) => ({
+        user: { ...state.user, ...updatedUser }
+      })),
 
       login: async (email, password) => {
         set({ isLoading: true });
