@@ -159,25 +159,23 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                 />
               </div>
 
-              <div className="flex space-x-4 pt-4">
+              <div className="flex flex-col-reverse md:flex-row md:items-center justify-end gap-2 md:gap-4 pt-4 md:pt-6 border-t border-slate-800/50">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="hidden lg:flex flex-1 py-4 px-6 bg-slate-800 text-slate-300 font-bold rounded-2xl hover:bg-slate-700 transition-all"
+                  className="w-full md:w-auto px-8 py-3 md:py-3.5 text-slate-400 hover:text-white font-semibold transition-all text-sm md:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || clients.length === 0}
-                  className="flex-1 flex items-center justify-center space-x-3 py-4 md:py-5 px-6 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest rounded-3xl md:rounded-2xl transition-all shadow-xl shadow-blue-500/20 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed active:scale-95"
+                  className="w-full md:w-auto flex items-center justify-center space-x-2 px-10 py-3 md:py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl md:rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
                 >
                   {loading ? (
-                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
                   ) : (
-                    <>
-                      <span>Launch Project</span>
-                    </>
+                    <span>Create Project</span>
                   )}
                 </button>
               </div>
