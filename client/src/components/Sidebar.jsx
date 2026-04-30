@@ -21,7 +21,6 @@ const Sidebar = ({ onClose }) => {
     { name: 'Projects', icon: Briefcase, path: '/projects' },
     { name: 'Tasks', icon: CheckSquare, path: '/tasks' },
     { name: 'Clients', icon: Users, path: '/clients' },
-    { name: 'Profile', icon: Settings, path: '/profile' },
   ];
 
   const handleLogout = async () => {
@@ -66,15 +65,31 @@ const Sidebar = ({ onClose }) => {
       </nav>
 
       <div className="p-3 border-t border-slate-800">
-        <div className="flex items-center space-x-3 px-3 py-2 mb-1">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[10px] font-bold">
-            {user?.name?.charAt(0).toUpperCase()}
-          </div>
-          <div className="flex-1 truncate">
-            <p className="text-xs font-semibold truncate text-slate-200">{user?.name}</p>
-            <p className="text-[10px] text-slate-500 truncate uppercase tracking-wider font-bold">{user?.role}</p>
-          </div>
-        </div>
+        <NavLink
+          to="/profile"
+          onClick={() => {
+            if (window.innerWidth < 1024) onClose();
+          }}
+          className={({ isActive }) => `
+            flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 mb-1
+            ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
+          `}
+        >
+          {({ isActive }) => (
+            <>
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white">
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 truncate">
+                <p className="text-xs font-semibold truncate">{user?.name}</p>
+                <p className={`text-[10px] truncate uppercase tracking-wider font-bold ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
+                  {user?.role}
+                </p>
+              </div>
+              <Settings size={14} className={isActive ? 'text-white' : 'text-slate-500'} />
+            </>
+          )}
+        </NavLink>
         <button
           onClick={handleLogout}
           className="flex items-center space-x-3 w-full px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-colors group"

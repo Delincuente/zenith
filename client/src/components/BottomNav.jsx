@@ -14,7 +14,6 @@ const navItems = [
   { name: 'Projects', icon: Briefcase, path: '/projects' },
   { name: 'Tasks', icon: CheckSquare, path: '/tasks' },
   { name: 'Clients', icon: Users, path: '/clients' },
-  { name: 'Profile', icon: Settings, path: '/profile' },
 ];
 
 const BottomNav = () => {
