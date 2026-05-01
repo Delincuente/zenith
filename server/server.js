@@ -12,6 +12,11 @@ app.use(cors({
   credentials: true,
 }));
 app.use(morgan('dev'));
+
+// Webhook routes (Mounted before express.json to handle raw bodies)
+const webhookRoutes = require('./routes/webhooks');
+app.use('/api/webhooks', webhookRoutes);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

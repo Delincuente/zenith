@@ -19,3 +19,11 @@ exports.createSubscriptionSession = async (user, priceId, successUrl, cancelUrl)
     },
   });
 };
+
+exports.verifyWebhook = (payload, signature) => {
+  return stripe.webhooks.constructEvent(
+    payload,
+    signature,
+    process.env.STRIPE_WEBHOOK_SECRET
+  );
+};
