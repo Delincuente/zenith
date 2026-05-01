@@ -66,6 +66,30 @@ const Sidebar = ({ onClose }) => {
 
       <div className="p-3 border-t border-slate-800">
         <NavLink
+          to="/plans"
+          onClick={() => {
+            if (window.innerWidth < 1024) onClose();
+          }}
+          className={({ isActive }) => `
+            flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 mb-1
+            ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
+          `}
+        >
+          {({ isActive }) => (
+            <>
+              <div className={`flex items-center justify-center w-7 h-7 rounded-lg ${isActive ? 'bg-white/20' : 'bg-slate-800'}`}>
+                <Zap size={14} className={isActive ? 'text-white' : 'text-blue-500'} />
+              </div>
+              <div className="flex-1 truncate">
+                <span className="text-sm font-medium block">Plan & Pricing</span>
+                <span className={`text-[10px] uppercase tracking-wider font-bold block ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
+                  {user?.plan || 'Free'}
+                </span>
+              </div>
+            </>
+          )}
+        </NavLink>
+        <NavLink
           to="/profile"
           onClick={() => {
             if (window.innerWidth < 1024) onClose();

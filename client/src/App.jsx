@@ -12,6 +12,7 @@ import Projects from './pages/Projects';
 import Tasks from './pages/Tasks';
 import Clients from './pages/Clients';
 import Profile from './pages/Profile';
+import PlanPricing from './pages/PlanPricing';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -28,6 +29,7 @@ const AnimatedRoutes = () => {
           <Route path="tasks" element={<PageWrapper><Tasks /></PageWrapper>} />
           <Route path="clients" element={<PageWrapper><Clients /></PageWrapper>} />
           <Route path="profile" element={<PageWrapper><Profile /></PageWrapper>} />
+          <Route path="plans" element={<PageWrapper><PlanPricing /></PageWrapper>} />
         </Route>
       </Routes>
     </AnimatePresence>
