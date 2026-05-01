@@ -13,6 +13,8 @@ import Tasks from './pages/Tasks';
 import Clients from './pages/Clients';
 import Profile from './pages/Profile';
 import PlanPricing from './pages/PlanPricing';
+import BillingSuccess from './pages/BillingSuccess';
+import BillingCancel from './pages/BillingCancel';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -30,6 +32,8 @@ const AnimatedRoutes = () => {
           <Route path="clients" element={<PageWrapper><Clients /></PageWrapper>} />
           <Route path="profile" element={<PageWrapper><Profile /></PageWrapper>} />
           <Route path="plans" element={<PageWrapper><PlanPricing /></PageWrapper>} />
+          <Route path="billing/success" element={<PageWrapper><BillingSuccess /></PageWrapper>} />
+          <Route path="billing/cancel" element={<PageWrapper><BillingCancel /></PageWrapper>} />
         </Route>
       </Routes>
     </AnimatePresence>

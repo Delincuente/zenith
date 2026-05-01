@@ -16,7 +16,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
+app.use((req, res, next) => {
+  console.log(new Date(), req.method, req.url);
+  next();
+});
 
 // Routes
 const routes = require('./routes');
@@ -31,12 +34,13 @@ app.use('/api', routes);
 
 // Error handling middleware
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
+const { DATE } = require('sequelize');
 app.use(notFound);
 app.use(errorHandler);
 
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
+  console.log(`Server is running on port ${PORT}`);
+});
 

@@ -33,3 +33,7 @@ export const USER_ENDPOINTS = {
   PROFILE_UPDATE: '/users/profile',
   CHANGE_PASSWORD: '/users/change-password',
 };
+
+export const BILLING_ENDPOINTS = {
+  CREATE_CHECKOUT: '/billing/create-checkout-session',
+};

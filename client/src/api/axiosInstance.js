@@ -51,7 +51,7 @@ axiosInstance.interceptors.response.use(
     const errorMessage = error.response?.data?.message || 'Something went wrong';
 
     // Only show toast if it's not a 401 (already handled) or a validation error (usually handled in components)
-    if (error.response?.status !== 401 && error.response?.status !== 422) {
+    if (error.response?.status !== 401 && error.response?.status !== 422 && !error.config?._skipToast) {
       toast.error(errorMessage);
     }
 

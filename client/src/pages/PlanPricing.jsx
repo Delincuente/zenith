@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Check, Zap, Users, Shield, ArrowRight } from 'lucide-react';
-import axios from 'axios';
+import { billingService } from '../api';
 import toast from 'react-hot-toast';
 
 const Pricing = () => {
@@ -42,19 +42,15 @@ const Pricing = () => {
 
     setLoading(planId);
     try {
-      const response = await axios.post('/api/billing/create-checkout-session', {
-        plan: planId,
-        interval: billingCycle
-      }, { withCredentials: true });
+      const data = await billingService.createCheckoutSession(planId, billingCycle, { _skipToast: true });
 
-      console.log(response.data)
-
-      if (response.data.url) {
-        window.location.href = response.data.url;
+      if (data.url) {
+        window.location.href = data.url;
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('Failed to initiate checkout. Please try again.');
+      const serverError = error.response?.data?.message;
+      toast.error(serverError || 'Failed to initiate checkout. Please try again.');
     } finally {
       setLoading(null);
     }
