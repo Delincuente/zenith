@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { userService } from '../api';
 import useAuthStore from '../store/useAuthStore';
 import { User, Mail, Lock, CheckCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
+import { focusFirstError } from '../utils/formUtils';
 
 const Profile = () => {
   const { user, updateUser } = useAuthStore();
@@ -13,6 +14,7 @@ const Profile = () => {
   });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+  const [profileFieldErrors, setProfileFieldErrors] = useState({});
 
   // Password Change State
   const [passwordData, setPasswordData] = useState({
@@ -22,6 +24,7 @@ const Profile = () => {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -44,6 +47,18 @@ const Profile = () => {
     e.preventDefault();
     setProfileLoading(true);
     setProfileMessage({ type: '', text: '' });
+    setProfileFieldErrors({});
+
+    const newErrors = {};
+    if (!profileData.name.trim()) newErrors.name = 'Full name is required.';
+    if (!profileData.email.trim()) newErrors.email = 'Email address is required.';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setProfileFieldErrors(newErrors);
+      focusFirstError(newErrors);
+      setProfileLoading(false);
+      return;
+    }
 
     try {
       const response = await userService.updateProfile(profileData);
@@ -61,9 +76,21 @@ const Profile = () => {
 
   const onChangePassword = async (e) => {
     e.preventDefault();
+    setPasswordFieldErrors({});
     
+    const newErrors = {};
+    if (!passwordData.currentPassword) newErrors.currentPassword = 'Current password is required.';
+    if (!passwordData.newPassword) newErrors.newPassword = 'New password is required.';
+    if (passwordData.newPassword.length < 6) newErrors.newPassword = 'Password must be at least 6 characters.';
+    if (!passwordData.confirmPassword) newErrors.confirmPassword = 'Please confirm your new password.';
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      return setPasswordMessage({ type: 'error', text: 'Passwords do not match' });
+      newErrors.confirmPassword = 'Passwords do not match.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setPasswordFieldErrors(newErrors);
+      focusFirstError(newErrors);
+      return;
     }
 
     setPasswordLoading(true);
@@ -110,7 +137,7 @@ const Profile = () => {
             </div>
             
             <div className="md:col-span-2">
-              <form onSubmit={onUpdateProfile} className="space-y-6">
+              <form onSubmit={onUpdateProfile} noValidate className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-400 uppercase tracking-widest mb-2.5 ml-1">
                     Full Name
@@ -124,11 +151,11 @@ const Profile = () => {
                       name="name"
                       value={profileData.name}
                       onChange={handleProfileChange}
-                      className="block w-full pl-12 pr-4 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                      className={`block w-full pl-12 pr-4 py-4 bg-slate-800/40 border ${profileFieldErrors.name ? 'border-red-500' : 'border-slate-700/50'} rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium`}
                       placeholder="Your Name"
-                      required
                     />
                   </div>
+                  {profileFieldErrors.name && <p className="mt-2 text-xs text-red-500 ml-1 font-medium">{profileFieldErrors.name}</p>}
                 </div>
 
                 <div>
@@ -144,11 +171,11 @@ const Profile = () => {
                       name="email"
                       value={profileData.email}
                       onChange={handleProfileChange}
-                      className="block w-full pl-12 pr-4 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                      className={`block w-full pl-12 pr-4 py-4 bg-slate-800/40 border ${profileFieldErrors.email ? 'border-red-500' : 'border-slate-700/50'} rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium`}
                       placeholder="you@example.com"
-                      required
                     />
                   </div>
+                  {profileFieldErrors.email && <p className="mt-2 text-xs text-red-500 ml-1 font-medium">{profileFieldErrors.email}</p>}
                 </div>
 
                 {profileMessage.text && (
@@ -194,7 +221,7 @@ const Profile = () => {
             </div>
 
             <div className="md:col-span-2">
-              <form onSubmit={onChangePassword} className="space-y-6">
+              <form onSubmit={onChangePassword} noValidate className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-400 uppercase tracking-widest mb-2.5 ml-1">
                     Current Password
@@ -208,10 +235,10 @@ const Profile = () => {
                       name="currentPassword"
                       value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
-                      className="block w-full pl-12 pr-4 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
-                      required
+                      className={`block w-full pl-12 pr-4 py-4 bg-slate-800/40 border ${passwordFieldErrors.currentPassword ? 'border-red-500' : 'border-slate-700/50'} rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium`}
                     />
                   </div>
+                  {passwordFieldErrors.currentPassword && <p className="mt-2 text-xs text-red-500 ml-1 font-medium">{passwordFieldErrors.currentPassword}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -228,10 +255,10 @@ const Profile = () => {
                         name="newPassword"
                         value={passwordData.newPassword}
                         onChange={handlePasswordChange}
-                        className="block w-full pl-12 pr-4 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
-                        required
+                        className={`block w-full pl-12 pr-4 py-4 bg-slate-800/40 border ${passwordFieldErrors.newPassword ? 'border-red-500' : 'border-slate-700/50'} rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium`}
                       />
                     </div>
+                    {passwordFieldErrors.newPassword && <p className="mt-2 text-xs text-red-500 ml-1 font-medium">{passwordFieldErrors.newPassword}</p>}
                   </div>
 
                   <div>
@@ -247,10 +274,10 @@ const Profile = () => {
                         name="confirmPassword"
                         value={passwordData.confirmPassword}
                         onChange={handlePasswordChange}
-                        className="block w-full pl-12 pr-4 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
-                        required
+                        className={`block w-full pl-12 pr-4 py-4 bg-slate-800/40 border ${passwordFieldErrors.confirmPassword ? 'border-red-500' : 'border-slate-700/50'} rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium`}
                       />
                     </div>
+                    {passwordFieldErrors.confirmPassword && <p className="mt-2 text-xs text-red-500 ml-1 font-medium">{passwordFieldErrors.confirmPassword}</p>}
                   </div>
                 </div>
 

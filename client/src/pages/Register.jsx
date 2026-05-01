@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { UserPlus, Mail, Lock, User, AlertCircle, Building, Zap } from 'lucide-react';
 import { validateEmail, validatePassword, validateName } from '../utils/validators';
+import { focusFirstError } from '../utils/formUtils';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -33,6 +34,7 @@ const Register = () => {
     
     if (Object.keys(newErrors).length > 0) {
       setFieldErrors(newErrors);
+      focusFirstError(newErrors);
       return;
     }
 
@@ -67,7 +69,7 @@ const Register = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
               <div className="relative">
@@ -79,7 +81,7 @@ const Register = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.name ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.name ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all`}
                   placeholder="John Doe"
                 />
               </div>
@@ -97,7 +99,7 @@ const Register = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.email ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.email ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all`}
                   placeholder="john@example.com"
                 />
               </div>
@@ -115,7 +117,7 @@ const Register = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.password ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.password ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all`}
                   placeholder="••••••••"
                 />
               </div>

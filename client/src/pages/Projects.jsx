@@ -44,7 +44,7 @@ const Projects = () => {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-4 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95 w-full md:w-auto text-sm md:text-base"
+          className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/25 active:scale-95 w-full md:w-auto text-xs md:text-sm"
         >
           <Plus size={18} className="md:w-5 md:h-5" />
           <span>New Project</span>

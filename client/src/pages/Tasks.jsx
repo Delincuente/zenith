@@ -12,6 +12,7 @@ import {
   MoreVertical,
   ChevronRight
 } from 'lucide-react';
+import { formatDate } from '../utils/dateFormatter';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -127,7 +128,7 @@ const Tasks = () => {
                     <p className="text-[9px] md:text-xs text-slate-500 mt-0.5 md:mt-1 flex items-center space-x-1.5 truncate">
                        <span className="font-semibold text-blue-500 uppercase shrink-0">{task.Project?.title}</span>
                        <span className="shrink-0">•</span>
-                       <span className="truncate">{new Date(task.created_at).toLocaleDateString()}</span>
+                       <span className="truncate">{formatDate(task.createdAt)}</span>
                     </p>
                   </div>
                 </div>

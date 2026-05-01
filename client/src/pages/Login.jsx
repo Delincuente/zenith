@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { LogIn, Mail, Lock, AlertCircle, Zap } from 'lucide-react';
 import { validateEmail } from '../utils/validators';
+import { focusFirstError } from '../utils/formUtils';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -25,6 +26,7 @@ const Login = () => {
     
     if (Object.keys(newErrors).length > 0) {
       setFieldErrors(newErrors);
+      focusFirstError(newErrors);
       return;
     }
 
@@ -59,7 +61,7 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
               <div className="relative">
@@ -68,9 +70,10 @@ const Login = () => {
                 </span>
                 <input
                   type="email"
+                  name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.email ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.email ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all`}
                   placeholder="name@company.com"
                 />
               </div>
@@ -85,9 +88,10 @@ const Login = () => {
                 </span>
                 <input
                   type="password"
+                  name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.password ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                  className={`block w-full pl-10 pr-3 py-3 bg-slate-800/50 border ${fieldErrors.password ? 'border-red-500' : 'border-slate-700'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all`}
                   placeholder="••••••••"
                 />
               </div>
