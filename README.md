@@ -4,7 +4,7 @@ A production-ready SaaS application for freelancers and agencies to manage clien
 ## Live Demo
 🔗 [zenith.hardikbutani.com](https://zenith.hardikbutani.com)
 
-![Zenith Dashboard](screenshot.png)
+![Zenith Dashboard](Zenith_Dashboard.png)
 
 ## Features
 
