@@ -8,6 +8,6 @@ const webhookController = require('../../controllers/webhookController');
  * It is handled in server.js by mounting this router before express.json()
  * or by using express.raw() specifically for this route.
  */
-router.post('/stripe', express.raw({ type: 'application/json' }), webhookController.handleStripeWebhook);
+router.post('/', express.raw({ type: 'application/json' }), webhookController.handleStripeWebhook);
 
 module.exports = router;

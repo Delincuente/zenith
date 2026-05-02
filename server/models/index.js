@@ -20,8 +20,19 @@ db.User = require('./user')(sequelize);
 db.Client = require('./client')(sequelize);
 db.Project = require('./project')(sequelize);
 db.Task = require('./task')(sequelize);
+db.Subscription = require('./subscription')(sequelize);
+db.Payment = require('./payment')(sequelize);
+db.WebhookEvent = require('./webhookEvent')(sequelize);
 
 // Associations
+// User & Subscription
+db.User.hasOne(db.Subscription, { foreignKey: 'user_id' });
+db.Subscription.belongsTo(db.User, { foreignKey: 'user_id' });
+
+// User & Payment
+db.User.hasMany(db.Payment, { foreignKey: 'user_id' });
+db.Payment.belongsTo(db.User, { foreignKey: 'user_id' });
+
 // User & Client
 db.User.hasMany(db.Client, { foreignKey: 'user_id' });
 db.Client.belongsTo(db.User, { foreignKey: 'user_id' });

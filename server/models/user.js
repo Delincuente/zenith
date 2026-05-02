@@ -31,7 +31,27 @@ module.exports = (sequelize) => {
     refresh_token: {
       type: DataTypes.TEXT,
       allowNull: true,
-    }
+    },
+    stripe_customer_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    stripe_subscription_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    current_plan: {
+      type: DataTypes.STRING,
+      defaultValue: 'free',
+    },
+    subscription_status: {
+      type: DataTypes.STRING,
+      defaultValue: 'none',
+    },
+    current_period_end: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   }, {
     underscored: true,
     hooks: {
