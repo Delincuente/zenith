@@ -1,14 +1,17 @@
 # Project Management SaaS Platform
 
 A production-ready SaaS application for freelancers and agencies to manage clients, projects, tasks, and payments.
+## Live Demo
+🔗 [zenith.hardikbutani.com](https://zenith.hardikbutani.com)
+
+![Zenith Dashboard](Zenith_Dashboard.png)
 
 ## Features
 
 - **Auth**: JWT with Refresh Tokens, Role-based Access (Admin/Client).
-- **Projects**: CRUD, filtering, searching, and activity logging.
+- **Projects**: CRUD, filtering, searching.
 - **Tasks**: Management within projects with real-time updates.
 - **Payments**: Integrated Stripe Checkout with Webhook verification.
-- **Real-time**: Live notifications via Socket.io.
 - **Design**: Modern, dark-themed UI using Tailwind CSS and Framer Motion.
 
 ## Tech Stack
