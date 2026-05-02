@@ -214,7 +214,7 @@ exports.handleStripeWebhook = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('❌ Webhook processing failed:', error);
-    res.status(500).json({ message: 'Webhook processing failed' });
+    res.status(500).json({ message: 'Webhook processing failed', error: error.message });
   }
 };
 
