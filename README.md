@@ -1,6 +1,10 @@
 # Project Management SaaS Platform
 
 A production-ready SaaS application for freelancers and agencies to manage clients, projects, tasks, and payments.
+## Live Demo
+🔗 [zenith.hardikbutani.com](https://zenith.hardikbutani.com)
+
+![Zenith Dashboard](screenshot.png)
 
 ## Features
 
