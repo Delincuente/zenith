@@ -83,8 +83,7 @@ exports.handleStripeWebhook = async (req, res) => {
         const userId = await getUserIdByCustomer(subscription.customer);
 
         if (!userId) {
-          console.warn('⚠️ User not found for customer:', subscription.customer);
-          break;
+          throw new Error(`User not found for Stripe customer: ${subscription.customer}`);
         }
 
         await db.Subscription.upsert({
@@ -119,6 +118,11 @@ exports.handleStripeWebhook = async (req, res) => {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
 
+        const userId = await getUserIdByCustomer(subscription.customer);
+        if (!userId) {
+          throw new Error(`User not found for Stripe customer: ${subscription.customer}`);
+        }
+
         await db.Subscription.update({
           status: 'canceled',
         }, {
@@ -147,7 +151,9 @@ exports.handleStripeWebhook = async (req, res) => {
         if (invoice.subscription) {
           const userId = await getUserIdByCustomer(invoice.customer);
 
-          if (!userId) break;
+          if (!userId) {
+            throw new Error(`User not found for Stripe customer: ${invoice.customer}`);
+          }
 
           await db.Payment.create({
             user_id: userId,
@@ -178,6 +184,11 @@ exports.handleStripeWebhook = async (req, res) => {
       // =========================================================
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
+
+        const userId = await getUserIdByCustomer(invoice.customer);
+        if (!userId) {
+          throw new Error(`User not found for Stripe customer: ${invoice.customer}`);
+        }
 
         await db.User.update({
           subscription_status: 'past_due',
