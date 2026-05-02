@@ -80,7 +80,12 @@ exports.handleStripeWebhook = async (req, res) => {
 
         const plan = planMap[priceId] || 'free';
 
-        const userId = await getUserIdByCustomer(subscription.customer);
+        let userId = await getUserIdByCustomer(subscription.customer);
+
+        // 🏎️ Race Condition Fallback: Check metadata if customer ID isn't linked yet
+        if (!userId && subscription.metadata?.userId) {
+          userId = subscription.metadata.userId;
+        }
 
         if (!userId) {
           throw new Error(`User not found for Stripe customer: ${subscription.customer}`);
@@ -118,7 +123,11 @@ exports.handleStripeWebhook = async (req, res) => {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
 
-        const userId = await getUserIdByCustomer(subscription.customer);
+        let userId = await getUserIdByCustomer(subscription.customer);
+        if (!userId && subscription.metadata?.userId) {
+          userId = subscription.metadata.userId;
+        }
+
         if (!userId) {
           throw new Error(`User not found for Stripe customer: ${subscription.customer}`);
         }
@@ -149,7 +158,13 @@ exports.handleStripeWebhook = async (req, res) => {
         const invoice = event.data.object;
 
         if (invoice.subscription) {
-          const userId = await getUserIdByCustomer(invoice.customer);
+          let userId = await getUserIdByCustomer(invoice.customer);
+
+          // Fallback to metadata from the subscription if available
+          if (!userId) {
+            const sub = await stripeService.getSubscription(invoice.subscription);
+            userId = sub.metadata?.userId;
+          }
 
           if (!userId) {
             throw new Error(`User not found for Stripe customer: ${invoice.customer}`);
@@ -185,7 +200,12 @@ exports.handleStripeWebhook = async (req, res) => {
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
 
-        const userId = await getUserIdByCustomer(invoice.customer);
+        let userId = await getUserIdByCustomer(invoice.customer);
+        if (!userId && invoice.subscription) {
+          const sub = await stripeService.getSubscription(invoice.subscription);
+          userId = sub.metadata?.userId;
+        }
+
         if (!userId) {
           throw new Error(`User not found for Stripe customer: ${invoice.customer}`);
         }

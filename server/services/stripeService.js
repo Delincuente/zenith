@@ -19,6 +19,11 @@ class StripeService {
         },
       ],
       mode: 'subscription',
+      subscription_data: {
+        metadata: {
+          userId: user.id,
+        },
+      },
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
