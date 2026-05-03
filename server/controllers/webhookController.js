@@ -30,6 +30,27 @@ exports.handleStripeWebhook = async (req, res) => {
   const transaction = await db.sequelize.transaction();
 
   try {
+    // =========================================================
+    // 🔒 ENTITY-LEVEL LOCKING (Senior Dev Solution)
+    // =========================================================
+    // We lock the User row at the start of the transaction. 
+    // If multiple webhooks for the same user arrive at once, they will 
+    // now queue up and process one-by-one instead of fighting (Deadlock).
+    
+    const sessionOrSub = event.data.object;
+    const customerId = sessionOrSub.customer;
+    const metadataUserId = sessionOrSub.metadata?.userId;
+
+    // Try to find and lock the user
+    // We use stripe_customer_id if available, otherwise fallback to userId from metadata
+    if (customerId || metadataUserId) {
+      await db.User.findOne({
+        where: customerId ? { stripe_customer_id: customerId } : { id: metadataUserId },
+        lock: transaction.LOCK.UPDATE,
+        transaction
+      });
+    }
+
     switch (event.type) {
 
       // =========================================================
@@ -169,10 +190,13 @@ exports.handleStripeWebhook = async (req, res) => {
           if (!userId) {
             throw new Error(`User not found for Stripe customer: ${invoice.customer}`);
           }
+          console.log('DEBUG: Invoice Keys:', Object.keys(invoice));
+          const paymentId = invoice.payment_intent || invoice.charge;
+
           await db.Payment.create({
             user_id: userId,
             stripe_invoice_id: invoice.id,
-            stripe_payment_intent_id: invoice.payment_intent,
+            stripe_payment_intent_id: paymentId,
             amount: invoice.amount_paid,
             currency: invoice.currency,
             status: 'paid',
@@ -228,7 +252,14 @@ exports.handleStripeWebhook = async (req, res) => {
     res.json({ received: true });
 
   } catch (error) {
-    await transaction.rollback();
+    if (transaction) {
+      try {
+        await transaction.rollback();
+      } catch (rollbackError) {
+        // Already rolled back or finished
+      }
+    }
+    console.error('❌ Webhook processing failed:', error);
     res.status(500).json({ message: 'Webhook processing failed', error: error.message });
   }
 };
