@@ -10,9 +10,7 @@ exports.handleStripeWebhook = async (req, res) => {
 
   try {
     event = stripeService.verifyWebhook(req.body, sig);
-    console.log(`\n🔔 Webhook Received: ${event.type} [ID: ${event.id}]`);
   } catch (err) {
-    console.error(`Webhook Signature Error: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -32,7 +30,6 @@ exports.handleStripeWebhook = async (req, res) => {
   const transaction = await db.sequelize.transaction();
 
   try {
-    console.log(`=========================================================${event.type}`);
     switch (event.type) {
 
       // =========================================================
@@ -41,7 +38,6 @@ exports.handleStripeWebhook = async (req, res) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
 
-        console.log(`📊 Session Mode: ${session.mode}`);
         // 🔥 Only handle subscription mode
         if (session.mode === 'subscription') {
           const userId = session.metadata?.userId;
@@ -58,7 +54,6 @@ exports.handleStripeWebhook = async (req, res) => {
             { where: { id: userId }, transaction }
           );
 
-          console.log('✅ User linked with Stripe customer + subscription');
         }
 
         break;
@@ -93,6 +88,8 @@ exports.handleStripeWebhook = async (req, res) => {
         if (!userId) {
           throw new Error(`User not found for Stripe customer: ${subscription.customer}`);
         }
+        const periodStart = subscription.current_period_start || subscription.items?.data[0]?.current_period_start || subscription.start_date;
+        const periodEnd = subscription.current_period_end || subscription.items?.data[0]?.current_period_end;
 
         await db.Subscription.upsert({
           stripe_subscription_id: subscription.id,
@@ -101,22 +98,21 @@ exports.handleStripeWebhook = async (req, res) => {
           plan: plan,
           price_id: priceId,
           status: subscription.status,
-          current_period_start: new Date(subscription.current_period_start * 1000),
-          current_period_end: new Date(subscription.current_period_end * 1000),
+          current_period_start: periodStart ? new Date(periodStart * 1000) : new Date(),
+          current_period_end: periodEnd ? new Date(periodEnd * 1000) : new Date(),
           cancel_at_period_end: subscription.cancel_at_period_end,
         }, { transaction });
 
         await db.User.update({
           current_plan: plan,
           subscription_status: subscription.status,
-          current_period_end: new Date(subscription.current_period_end * 1000),
+          current_period_end: periodEnd ? new Date(periodEnd * 1000) : new Date(),
           stripe_subscription_id: subscription.id
         }, {
           where: { stripe_customer_id: subscription.customer },
           transaction
         });
 
-        console.log('🔄 Subscription synced');
         break;
       }
 
@@ -150,7 +146,6 @@ exports.handleStripeWebhook = async (req, res) => {
           transaction
         });
 
-        console.log('🚫 Subscription canceled');
         break;
       }
 
@@ -191,7 +186,6 @@ exports.handleStripeWebhook = async (req, res) => {
             transaction
           });
 
-          console.log('💰 Payment recorded');
         }
 
         break;
@@ -220,12 +214,11 @@ exports.handleStripeWebhook = async (req, res) => {
           transaction
         });
 
-        console.log('⚠️ Payment failed');
         break;
       }
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+      // console.log(`Unhandled event type ${event.type}`);
     }
 
     // ✅ mark processed
@@ -236,7 +229,6 @@ exports.handleStripeWebhook = async (req, res) => {
 
   } catch (error) {
     await transaction.rollback();
-    console.error('❌ Webhook processing failed:', error);
     res.status(500).json({ message: 'Webhook processing failed', error: error.message });
   }
 };
