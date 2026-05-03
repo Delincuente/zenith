@@ -154,20 +154,21 @@ exports.handleStripeWebhook = async (req, res) => {
       // =========================================================
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
+        console.log(invoice)
+        const subscriptionId = invoice.subscription || invoice.parent?.subscription_details?.subscription;
 
-        if (invoice.subscription) {
+        if (subscriptionId) {
           let userId = await getUserIdByCustomer(invoice.customer);
 
           // Fallback to metadata from the subscription if available
           if (!userId) {
-            const sub = await stripeService.getSubscription(invoice.subscription);
+            const sub = await stripeService.getSubscription(subscriptionId);
             userId = sub.metadata?.userId;
           }
 
           if (!userId) {
             throw new Error(`User not found for Stripe customer: ${invoice.customer}`);
           }
-
           await db.Payment.create({
             user_id: userId,
             stripe_invoice_id: invoice.id,
@@ -185,7 +186,6 @@ exports.handleStripeWebhook = async (req, res) => {
             where: { stripe_customer_id: invoice.customer },
             transaction
           });
-
         }
 
         break;
