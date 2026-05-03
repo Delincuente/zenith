@@ -10,6 +10,7 @@ exports.handleStripeWebhook = async (req, res) => {
 
   try {
     event = stripeService.verifyWebhook(req.body, sig);
+    console.log(`\n🔔 Webhook Received: ${event.type} [ID: ${event.id}]`);
   } catch (err) {
     console.error(`Webhook Signature Error: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -31,6 +32,7 @@ exports.handleStripeWebhook = async (req, res) => {
   const transaction = await db.sequelize.transaction();
 
   try {
+    console.log(`=========================================================${event.type}`);
     switch (event.type) {
 
       // =========================================================
@@ -39,6 +41,7 @@ exports.handleStripeWebhook = async (req, res) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
 
+        console.log(`📊 Session Mode: ${session.mode}`);
         // 🔥 Only handle subscription mode
         if (session.mode === 'subscription') {
           const userId = session.metadata?.userId;
