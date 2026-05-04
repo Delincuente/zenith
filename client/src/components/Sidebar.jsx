@@ -83,7 +83,7 @@ const Sidebar = ({ onClose }) => {
               <div className="flex-1 truncate">
                 <span className="text-sm font-medium block">Plan & Pricing</span>
                 <span className={`text-[10px] uppercase tracking-wider font-bold block ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
-                  {user?.plan || 'Free'}
+                  {user?.current_plan || 'Free'}
                 </span>
               </div>
             </>

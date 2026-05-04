@@ -71,6 +71,8 @@ exports.getMe = async (req, res, next) => {
       name: req.user.name,
       email: req.user.email,
       role: req.user.role,
+      current_plan: req.user.current_plan,
+      subscription_status: req.user.subscription_status,
     };
     res.json({ user });
   } catch (error) {

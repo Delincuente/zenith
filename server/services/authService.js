@@ -70,7 +70,7 @@ const registerUser = async ({ name, email, password, role }) => {
   await user.save();
 
   return {
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    user: { id: user.id, name: user.name, email: user.email, role: user.role, current_plan: user.current_plan, subscription_status: user.subscription_status },
     accessToken,
     refreshToken,
   };
@@ -95,7 +95,7 @@ const loginUser = async ({ email, password }) => {
   await user.save();
 
   return {
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    user: { id: user.id, name: user.name, email: user.email, role: user.role, current_plan: user.current_plan, subscription_status: user.subscription_status },
     accessToken,
     refreshToken,
   };

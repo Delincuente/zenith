@@ -1,16 +1,18 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, ArrowRight } from 'lucide-react';
+import useAuthStore from '../store/useAuthStore';
 
 const BillingSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const { checkAuth } = useAuthStore();
 
   useEffect(() => {
-    // Optionally verify session on backend here if needed
-    // But webhooks will handle the database update reliably.
-  }, [sessionId]);
+    // Refresh user data to show the new plan
+    checkAuth();
+  }, [checkAuth]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">

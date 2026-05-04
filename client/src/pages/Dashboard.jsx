@@ -55,7 +55,7 @@ const Dashboard = () => {
           </div>
           <div>
             <p className="text-[9px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest">Plan</p>
-            <p className="text-xs md:text-sm font-black text-white uppercase">{user?.plan || 'Free'}</p>
+            <p className="text-xs md:text-sm font-black text-white uppercase">{user?.current_plan || 'Free'}</p>
           </div>
           <a href="/billing" className="ml-3 p-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">
             <ChevronRight size={14} className="md:w-4 md:h-4" />
