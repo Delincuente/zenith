@@ -15,8 +15,9 @@ const StatCard = ({ title, value, icon: Icon, color, trend }) => (
     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent -mr-8 -mt-8 rounded-full blur-2xl group-hover:bg-white/10 transition-colors" />
     
     <div className="flex justify-between items-start mb-3 md:mb-5 relative z-10">
-      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg ${color} bg-opacity-10`}>
-        <Icon size={20} className={`${color.replace('bg-', 'text-')} md:w-6 md:h-6`} />
+      <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg ${color} relative`}>
+        <div className={`absolute inset-0 rounded-xl md:rounded-2xl ${color} blur-md opacity-40 group-hover:opacity-60 transition-opacity`} />
+        <Icon size={24} className="text-white relative z-20 md:w-7 md:h-7" />
       </div>
       {trend && (
         <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg ${trend.startsWith('+') ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
@@ -57,7 +58,7 @@ const Dashboard = () => {
             <p className="text-[9px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest">Plan</p>
             <p className="text-xs md:text-sm font-black text-white uppercase">{user?.current_plan || 'Free'}</p>
           </div>
-          <a href="/billing" className="ml-3 p-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">
+          <a href="/plans" className="ml-3 p-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">
             <ChevronRight size={14} className="md:w-4 md:h-4" />
           </a>
         </div>
