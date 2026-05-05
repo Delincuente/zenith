@@ -17,6 +17,8 @@ import { formatDate } from '../utils/dateFormatter';
 import ConfirmModal from '../components/ConfirmModal';
 import { focusFirstError } from '../utils/formUtils';
 
+import useDebounce from '../hooks/useDebounce';
+
 const Clients = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +30,12 @@ const Clients = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState(null);
 
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 600);
+
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -42,7 +47,9 @@ const Clients = () => {
 
   const fetchClients = async () => {
     try {
-      const { data } = await axiosInstance.get('/clients');
+      const { data } = await axiosInstance.get('/clients', {
+        params: { search: debouncedSearch }
+      });
       setClients(data);
     } catch (err) {
       console.error('Error fetching clients:', err);
@@ -113,6 +120,17 @@ const Clients = () => {
         </button>
       </div>
 
+      <div className="relative group max-w-md">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={20} />
+        <input
+          type="text"
+          placeholder="Search clients by name or phone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 md:py-4 bg-slate-900 border border-slate-800 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-white text-sm placeholder-slate-500 font-medium"
+        />
+      </div>
+
       <div className="bg-slate-900 border border-slate-800 rounded-2xl md:rounded-3xl overflow-hidden">
         {loading ? (
           <div className="p-12 md:p-20 text-center">
@@ -121,10 +139,14 @@ const Clients = () => {
         ) : clients.length === 0 ? (
           <div className="text-center py-12 md:py-20 bg-slate-900/50">
             <div className="bg-slate-800 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
-              <Building size={24} className="md:w-8 md:h-8" />
+              {search ? <Search size={24} className="md:w-8 md:h-8" /> : <Building size={24} className="md:w-8 md:h-8" />}
             </div>
-            <h3 className="text-lg md:text-xl font-semibold text-white">No clients added yet</h3>
-            <p className="text-slate-400 mt-2 text-xs md:text-sm max-w-xs mx-auto px-4">Start by adding your first client info.</p>
+            <h3 className="text-lg md:text-xl font-semibold text-white">
+              {search ? 'No results found' : 'No clients added yet'}
+            </h3>
+            <p className="text-slate-400 mt-2 text-xs md:text-sm max-w-xs mx-auto px-4">
+              {search ? `We couldn't find any clients matching "${search}"` : 'Start by adding your first client info.'}
+            </p>
           </div>
         ) : (
           <>

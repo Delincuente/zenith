@@ -11,17 +11,19 @@ import {
   Briefcase
 } from 'lucide-react';
 import CreateProjectModal from '../components/CreateProjectModal';
+import useDebounce from '../hooks/useDebounce';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 600);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const data = await projectService.getAll();
+      const data = await projectService.getAll({ search: debouncedSearch });
       setProjects(data.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -32,7 +34,7 @@ const Projects = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [debouncedSearch]);
 
 
   return (

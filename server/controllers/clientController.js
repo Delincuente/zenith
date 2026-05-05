@@ -15,11 +15,11 @@ exports.createClient = async (req, res, next) => {
 
 /**
  * GET /api/clients
- * Get all clients belonging to the authenticated user.
+ * Get all clients belonging to the authenticated user, with optional search.
  */
 exports.getClients = async (req, res, next) => {
   try {
-    const clients = await clientService.getClients(req.user.id);
+    const clients = await clientService.getClients(req.query, req.user.id);
     res.json(clients);
   } catch (error) {
     next(error);

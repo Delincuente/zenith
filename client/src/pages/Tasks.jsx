@@ -19,12 +19,14 @@ import { formatDate } from '../utils/dateFormatter';
 import CreateTaskModal from '../components/CreateTaskModal';
 import StatusDropdown from '../components/StatusDropdown';
 import ConfirmModal from '../components/ConfirmModal';
+import useDebounce from '../hooks/useDebounce';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 600);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
@@ -47,12 +49,12 @@ const Tasks = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [statusFilter, search]);
+  }, [statusFilter, debouncedSearch]);
 
   const fetchTasks = async () => {
     try {
       const { data } = await axiosInstance.get('/tasks', {
-        params: { status: statusFilter, search }
+        params: { status: statusFilter, search: debouncedSearch }
       });
       setTasks(data);
     } catch (err) {

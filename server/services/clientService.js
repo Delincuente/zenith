@@ -20,12 +20,22 @@ const createClient = async ({ company_name, phone }, userId) => {
 };
 
 /**
- * Retrieve all clients belonging to the given user.
+ * Retrieve all clients belonging to the given user, with optional search filtering.
+ * @param {object} filters - Search filters (e.g., { search: 'query' })
  * @param {string} userId
  * @returns {object[]} Array of client records
  */
-const getClients = async (userId) => {
-  return db.Client.findAll({ where: { user_id: userId } });
+const getClients = async ({ search }, userId) => {
+  const where = { user_id: userId };
+
+  if (search) {
+    where[db.Sequelize.Op.or] = [
+      { company_name: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { phone: { [db.Sequelize.Op.like]: `%${search}%` } },
+    ];
+  }
+
+  return db.Client.findAll({ where, order: [['created_at', 'DESC']] });
 };
 
 /**
