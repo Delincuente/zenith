@@ -21,19 +21,21 @@ const emitTaskEvent = (event, projectId, payload) => {
 
 /**
  * Get all tasks belonging to the authenticated user's projects.
- * @param {{ status?: string, search?: string }} filters
+ * @param {{ status?: string, search?: string, project_id?: string }} filters
  * @param {string} userId
  * @returns {object[]} Array of task records
  */
-const getTasks = async ({ status, search }, userId) => {
+const getTasks = async ({ status, search, project_id }, userId) => {
   const where = {};
   if (status) where.status = status;
   if (search) where.title = { [db.Sequelize.Op.like]: `%${search}%` };
+  if (project_id) where.project_id = project_id;
 
   return db.Task.findAll({
     include: [
       {
         model: db.Project,
+        as: 'project',
         where: { user_id: userId },
         attributes: ['title'],
       },
@@ -71,7 +73,7 @@ const createTask = async ({ project_id, title, description, assigned_to }, userI
  */
 const updateTask = async (taskId, updates, userId) => {
   const task = await db.Task.findByPk(taskId, {
-    include: [{ model: db.Project, where: { user_id: userId } }],
+    include: [{ model: db.Project, as: 'project', where: { user_id: userId } }],
   });
   if (!task) throw new AppError('Task not found', 404);
 
@@ -90,7 +92,7 @@ const updateTask = async (taskId, updates, userId) => {
  */
 const deleteTask = async (taskId, userId) => {
   const task = await db.Task.findByPk(taskId, {
-    include: [{ model: db.Project, where: { user_id: userId } }],
+    include: [{ model: db.Project, as: 'project', where: { user_id: userId } }],
   });
   if (!task) throw new AppError('Task not found', 404);
 

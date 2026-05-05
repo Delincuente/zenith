@@ -5,7 +5,7 @@ import { X, Briefcase, User, Calendar, AlertCircle } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 import { focusFirstError } from '../utils/formUtils';
 
-const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
+const CreateProjectModal = ({ isOpen, onClose, onProjectCreated, project = null }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -17,9 +17,19 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
+  const isEditing = !!project;
+
   useEffect(() => {
     if (isOpen) {
       fetchClients();
+      if (project) {
+        setFormData({
+          title: project.title || '',
+          description: project.description || '',
+          client_id: project.client_id || '',
+          deadline: project.deadline ? project.deadline.split('T')[0] : '',
+        });
+      }
     } else {
       // Reset form when modal is closed
       setFormData({
@@ -31,7 +41,7 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
       setFieldErrors({});
       setError('');
     }
-  }, [isOpen]);
+  }, [isOpen, project]);
 
   const fetchClients = async () => {
     try {
@@ -65,12 +75,17 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
         deadline: formData.deadline || null,
         description: formData.description.trim() || null
       };
-      await axiosInstance.post('/projects', submissionData);
+
+      if (isEditing) {
+        await axiosInstance.put(`/projects/${project.id}`, submissionData, { _skipToast: true });
+      } else {
+        await axiosInstance.post('/projects', submissionData, { _skipToast: true });
+      }
+
       onProjectCreated();
       onClose();
-      setFormData({ title: '', description: '', client_id: '', deadline: '' });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create project');
+      setError(err.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} project`);
     } finally {
       setLoading(false);
     }
@@ -102,8 +117,12 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
 
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">Create New Project</h2>
-                <p className="text-slate-400 text-sm md:text-base mt-1">Fill in the details to start a new collaboration.</p>
+                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                  {isEditing ? 'Edit Project' : 'Create New Project'}
+                </h2>
+                <p className="text-slate-400 text-sm md:text-base mt-1">
+                  {isEditing ? 'Update the project details below.' : 'Fill in the details to start a new collaboration.'}
+                </p>
               </div>
               <button onClick={onClose} className="hidden lg:flex text-slate-500 hover:text-white transition-colors bg-slate-800/50 p-2 rounded-xl">
                 <X size={20} />
@@ -190,7 +209,7 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                   {loading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
                   ) : (
-                    <span>Create Project</span>
+                    <span>{isEditing ? 'Save Changes' : 'Create Project'}</span>
                   )}
                 </button>
               </div>

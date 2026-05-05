@@ -2,9 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
 
-const StatusDropdown = ({ value, onChange }) => {
+const StatusDropdown = ({ value, onChange, onOpenChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (onOpenChange) onOpenChange(isOpen);
+  }, [isOpen]);
 
   const statuses = [
     { value: 'todo', label: 'TO DO', color: 'text-slate-400 bg-slate-400/10', dot: 'bg-slate-500' },

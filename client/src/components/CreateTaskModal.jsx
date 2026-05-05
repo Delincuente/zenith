@@ -72,9 +72,9 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, task = null }) => {
       };
 
       if (isEditing) {
-        await axiosInstance.put(`/tasks/${task.id}`, submissionData);
+        await axiosInstance.put(`/tasks/${task.id}`, submissionData, { _skipToast: true });
       } else {
-        await axiosInstance.post('/tasks', submissionData);
+        await axiosInstance.post('/tasks', submissionData, { _skipToast: true });
       }
       
       onTaskCreated();

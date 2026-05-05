@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
+import { projectService } from '../api';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckSquare, 
   Search, 
@@ -13,7 +15,9 @@ import {
   ChevronRight,
   Plus,
   Edit2,
-  Trash2
+  Trash2,
+  ChevronDown,
+  Briefcase
 } from 'lucide-react';
 import { formatDate } from '../utils/dateFormatter';
 import CreateTaskModal from '../components/CreateTaskModal';
@@ -25,6 +29,9 @@ const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+  const [projectFilter, setProjectFilter] = useState('');
+  const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 600);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +39,7 @@ const Tasks = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [deletingTaskId, setDeletingTaskId] = useState(null);
   const [activeMenu, setActiveMenu] = useState(null);
+  const [activeStatusId, setActiveStatusId] = useState(null);
 
   const statusColors = {
     todo: 'bg-slate-500/10 text-slate-400',
@@ -48,13 +56,27 @@ const Tasks = () => {
   };
 
   useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
     fetchTasks();
-  }, [statusFilter, debouncedSearch]);
+  }, [statusFilter, projectFilter, debouncedSearch]);
+
+  const fetchProjects = async () => {
+    try {
+      const response = await projectService.getAll({ limit: 100 });
+      setProjects(response.data || []);
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+      setProjects([]);
+    }
+  };
 
   const fetchTasks = async () => {
     try {
       const { data } = await axiosInstance.get('/tasks', {
-        params: { status: statusFilter, search: debouncedSearch }
+        params: { status: statusFilter, search: debouncedSearch, project_id: projectFilter }
       });
       setTasks(data);
     } catch (err) {
@@ -80,7 +102,7 @@ const Tasks = () => {
       toast.success('Task deleted successfully');
       fetchTasks();
     } catch (err) {
-      toast.error('Failed to delete task');
+      console.error('Delete task error:', err);
     } finally {
       setDeletingTaskId(null);
     }
@@ -90,6 +112,7 @@ const Tasks = () => {
     setEditingTask(task);
     setIsModalOpen(true);
     setActiveMenu(null);
+    setActiveStatusId(null);
   };
 
   const openDeleteConfirm = (taskId) => {
@@ -99,10 +122,16 @@ const Tasks = () => {
 
   const toggleExpand = (taskId) => {
     setExpandedTaskId(expandedTaskId === taskId ? null : taskId);
+    setActiveMenu(null);
+    setActiveStatusId(null);
   };
 
   return (
-    <div className="space-y-4 md:space-y-8 animate-in slide-in-from-bottom-4 duration-500" onClick={() => setActiveMenu(null)}>
+    <div className="space-y-4 md:space-y-8 animate-in slide-in-from-bottom-4 duration-500" onClick={() => {
+      setActiveMenu(null);
+      setActiveStatusId(null);
+      setIsProjectMenuOpen(false);
+    }}>
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 tracking-tight">Tasks Explorer</h2>
@@ -144,11 +173,72 @@ const Tasks = () => {
                 : 'text-slate-500 hover:text-slate-300'
               }`}
             >
-              {status === '' ? 'All' : status.replace('_', ' ').toUpperCase()}
+              {status === '' ? 'All Status' : status.replace('_', ' ').toUpperCase()}
             </button>
           ))}
         </div>
+
+        <div className="flex p-0.5 md:p-1 bg-slate-900 border border-slate-800 rounded-xl md:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative">
+            <button
+              onClick={() => setIsProjectMenuOpen(!isProjectMenuOpen)}
+              className={`flex items-center space-x-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[10px] md:text-sm font-semibold transition-all outline-none ${
+                projectFilter 
+                ? 'bg-blue-600/10 text-blue-400' 
+                : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              <Briefcase size={14} className={projectFilter ? 'text-blue-400' : 'text-slate-500'} />
+              <span className="whitespace-nowrap">
+                {projectFilter ? projects.find(p => p.id === projectFilter)?.title?.toUpperCase() : 'ALL PROJECTS'}
+              </span>
+              <ChevronDown size={14} className={`transition-transform duration-300 ${isProjectMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+          <AnimatePresence>
+            {isProjectMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 5, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute right-0 mt-2 w-48 md:w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-1.5 z-[100] backdrop-blur-xl"
+              >
+                <div className="max-h-64 overflow-y-auto no-scrollbar">
+                  <button
+                    onClick={() => {
+                      setProjectFilter('');
+                      setIsProjectMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2 text-[11px] font-bold flex items-center justify-between transition-colors ${
+                      projectFilter === '' ? 'text-blue-500 bg-blue-500/5' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    }`}
+                  >
+                    <span>ALL PROJECTS</span>
+                    {projectFilter === '' && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>}
+                  </button>
+                  <div className="h-[1px] bg-slate-800/50 my-1"></div>
+                  {Array.isArray(projects) && projects.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setProjectFilter(p.id);
+                        setIsProjectMenuOpen(false);
+                      }}
+                      className={`w-full px-4 py-2 text-[11px] font-bold flex items-center justify-between transition-colors ${
+                        projectFilter === p.id ? 'text-blue-500 bg-blue-500/5' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="truncate">{p.title.toUpperCase()}</span>
+                      {projectFilter === p.id && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
+    </div>
 
       <div className="grid grid-cols-1 gap-2 md:gap-4">
         {loading ? (
@@ -172,14 +262,16 @@ const Tasks = () => {
           </div>
         ) : (
           tasks.map((task) => {
-            const StatusIcon = statusIcons[task.status];
+            const StatusIcon = statusIcons[task.status] || Circle;
             const isExpanded = expandedTaskId === task.id;
             const isMenuOpen = activeMenu === task.id;
+            const isStatusOpen = activeStatusId === task.id;
+            const isAnyMenuOpen = isMenuOpen || isStatusOpen;
             
             return (
               <div 
                 key={task.id} 
-                className={`bg-slate-900 border border-slate-800 rounded-xl md:rounded-2xl hover:border-slate-700 transition-all group ${isExpanded ? 'ring-1 ring-blue-500/30' : ''} ${isMenuOpen ? 'z-30 relative' : 'z-0'}`}
+                className={`bg-slate-900 border border-slate-800 rounded-xl md:rounded-2xl hover:border-slate-700 transition-all group ${isExpanded ? 'ring-1 ring-blue-500/30' : ''} ${isAnyMenuOpen ? 'z-50 relative' : 'z-0 relative'}`}
               >
                 <div 
                   className="p-3 md:p-5 flex items-center justify-between gap-2 md:gap-4 cursor-pointer"
@@ -200,7 +292,7 @@ const Tasks = () => {
                         {task.title}
                       </h4>
                       <p className="text-[9px] md:text-xs text-slate-500 mt-0.5 md:mt-1 flex items-center space-x-1.5 truncate">
-                         <span className="font-semibold text-blue-500 uppercase shrink-0">{task.Project?.title}</span>
+                         <span className="font-semibold text-blue-500 uppercase shrink-0">{task.project?.title}</span>
                          <span className="shrink-0">•</span>
                          <span className="truncate">{formatDate(task.createdAt)}</span>
                       </p>
@@ -212,12 +304,17 @@ const Tasks = () => {
                       <StatusDropdown 
                         value={task.status} 
                         onChange={(newStatus) => handleStatusUpdate(task.id, newStatus)} 
+                        onOpenChange={(isOpen) => {
+                          if (isOpen) setActiveMenu(null);
+                          setActiveStatusId(isOpen ? task.id : null);
+                        }}
                       />
                     </div>
                     <div className="relative">
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (activeMenu !== task.id) setActiveStatusId(null);
                           setActiveMenu(activeMenu === task.id ? null : task.id);
                         }}
                         className={`p-1.5 rounded-lg transition-colors ${activeMenu === task.id ? 'bg-slate-800 text-white' : 'text-slate-600 hover:text-white hover:bg-slate-800/50'}`}

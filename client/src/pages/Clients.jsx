@@ -76,7 +76,7 @@ const Clients = () => {
     setFieldErrors({});
     setSubmitLoading(true);
     try {
-      await axiosInstance.post('/clients', formData);
+      await axiosInstance.post('/clients', formData, { _skipToast: true });
       setIsModalOpen(false);
       setFormData({ company_name: '', phone: '' });
       fetchClients();
@@ -94,8 +94,7 @@ const Clients = () => {
       fetchClients();
       toast.success('Client deleted successfully!');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to delete client';
-      toast.error(msg);
+      console.error('Delete client error:', err);
     }
   };
 

@@ -32,6 +32,11 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   scrollbar-width: none; /* Hide scrollbar for Chrome/Safari */
+  outline: none !important; /* Globally remove white focus borders */
+}
+
+*:focus {
+  outline: none !important;
 }
 
 ::-webkit-scrollbar {

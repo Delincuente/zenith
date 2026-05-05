@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
+import ProjectDetail from './pages/ProjectDetail';
 import Tasks from './pages/Tasks';
 import Clients from './pages/Clients';
 import Profile from './pages/Profile';
@@ -28,6 +29,7 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<PageWrapper><Dashboard /></PageWrapper>} />
           <Route path="projects" element={<PageWrapper><Projects /></PageWrapper>} />
+          <Route path="projects/:id" element={<PageWrapper><ProjectDetail /></PageWrapper>} />
           <Route path="tasks" element={<PageWrapper><Tasks /></PageWrapper>} />
           <Route path="clients" element={<PageWrapper><Clients /></PageWrapper>} />
           <Route path="profile" element={<PageWrapper><Profile /></PageWrapper>} />

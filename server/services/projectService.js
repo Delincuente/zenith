@@ -70,8 +70,6 @@ const getProjectById = async (projectId, userId) => {
     include: [
       { model: db.Client },
       { model: db.Task },
-      { model: db.Comment, include: [{ model: db.User, attributes: ['name'] }] },
-      { model: db.Payment },
     ],
   });
 

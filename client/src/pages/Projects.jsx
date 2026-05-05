@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { projectService } from '../api';
 import { 
   Plus, 
@@ -8,17 +9,27 @@ import {
   Calendar,
   Layers,
   Clock,
-  Briefcase
+  Briefcase,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import CreateProjectModal from '../components/CreateProjectModal';
+import ConfirmModal from '../components/ConfirmModal';
 import useDebounce from '../hooks/useDebounce';
+import toast from 'react-hot-toast';
+import axiosInstance from '../api/axiosInstance';
 
 const Projects = () => {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 600);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [editingProject, setEditingProject] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -36,9 +47,32 @@ const Projects = () => {
     fetchProjects();
   }, [debouncedSearch]);
 
+  const handleDeleteProject = async () => {
+    try {
+      await axiosInstance.delete(`/projects/${projectToDelete.id}`);
+      toast.success('Project deleted successfully');
+      fetchProjects();
+      setIsConfirmOpen(false);
+    } catch (error) {
+      console.error('Delete project error:', error);
+    }
+  };
+
+  const openEditModal = (project) => {
+    setEditingProject(project);
+    setIsModalOpen(true);
+    setActiveMenu(null);
+  };
+
+  const openDeleteConfirm = (project) => {
+    setProjectToDelete(project);
+    setIsConfirmOpen(true);
+    setActiveMenu(null);
+  };
+
 
   return (
-    <div className="space-y-4 md:space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-4 md:space-y-8 animate-in slide-in-from-bottom-4 duration-500" onClick={() => setActiveMenu(null)}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 tracking-tight">Projects</h2>
@@ -89,16 +123,52 @@ const Projects = () => {
           </div>
           <h3 className="text-lg md:text-xl font-semibold text-white">No projects found</h3>
           <p className="text-slate-400 mt-2 text-xs md:text-sm max-w-xs mx-auto px-4">Get started by creating your first project for a client.</p>
-          <button className="mt-4 md:mt-6 text-blue-400 text-sm md:text-base font-medium hover:underline underline-offset-4">Create Project</button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="mt-4 md:mt-6 text-blue-400 text-sm md:text-base font-medium hover:underline underline-offset-4"
+          >
+            Create Project
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {projects.map((project) => (
-            <div key={project.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="text-slate-500 hover:text-white">
-                  <MoreVertical size={18} className="md:w-5 md:h-5" />
-                </button>
+            <div 
+              key={project.id} 
+              onClick={() => navigate(`/projects/${project.id}`)}
+              className="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden cursor-pointer active:scale-[0.98]"
+            >
+              <div className="absolute top-0 right-0 p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                <div className="relative">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveMenu(activeMenu === project.id ? null : project.id);
+                    }}
+                    className={`p-2 rounded-lg transition-colors ${activeMenu === project.id ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-white hover:bg-slate-800/50'}`}
+                  >
+                    <MoreVertical size={18} className="md:w-5 md:h-5" />
+                  </button>
+
+                  {activeMenu === project.id && (
+                    <div className="absolute right-0 mt-2 w-36 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-1.5 z-[100] backdrop-blur-xl">
+                      <button 
+                        onClick={() => openEditModal(project)}
+                        className="w-full px-4 py-2 text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 flex items-center space-x-2 transition-colors"
+                      >
+                        <Edit2 size={14} />
+                        <span>EDIT PROJECT</span>
+                      </button>
+                      <button 
+                        onClick={() => openDeleteConfirm(project)}
+                        className="w-full px-4 py-2 text-[11px] font-bold text-red-500/70 hover:text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors border-t border-slate-800/50"
+                      >
+                        <Trash2 size={14} />
+                        <span>DELETE</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="flex items-center space-x-3 mb-3 md:mb-4">
@@ -144,8 +214,22 @@ const Projects = () => {
 
       <CreateProjectModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingProject(null);
+        }}
         onProjectCreated={fetchProjects}
+        project={editingProject}
+      />
+
+      <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleDeleteProject}
+        title="Delete Project?"
+        message={`Are you sure you want to delete "${projectToDelete?.title}"? This will permanently delete the project and all its associated tasks. This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        type="danger"
       />
     </div>
   );
