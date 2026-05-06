@@ -289,6 +289,7 @@ const Tasks = () => {
                     </button>
                     <div className="min-w-0">
                       <h4 className={`text-xs md:text-base font-bold text-white transition-all truncate ${task.status === 'done' ? 'line-through text-slate-500 opacity-50' : ''}`}>
+                        <span className="text-slate-500 mr-2 text-[10px] md:text-xs">{task.custom_number || `#${task.id.slice(0, 8)}`}</span>
                         {task.title}
                       </h4>
                       <p className="text-[9px] md:text-xs text-slate-500 mt-0.5 md:mt-1 flex items-center space-x-1.5 truncate">

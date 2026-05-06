@@ -31,7 +31,18 @@ module.exports = (sequelize) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    custom_number: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
   }, {
+    hooks: {
+      beforeCreate: async (project) => {
+        const count = await sequelize.models.project.count();
+        project.custom_number = `PR-${(count + 1).toString().padStart(3, '0')}`;
+      },
+    },
     underscored: true,
     tableName: 'projects'
   });

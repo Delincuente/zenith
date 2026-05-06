@@ -27,7 +27,18 @@ module.exports = (sequelize) => {
       type: DataTypes.UUID,
       allowNull: true,
     },
+    custom_number: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
   }, {
+    hooks: {
+      beforeCreate: async (task) => {
+        const count = await sequelize.models.task.count();
+        task.custom_number = `TK-${(count + 1).toString().padStart(3, '0')}`;
+      },
+    },
     underscored: true,
     tableName: 'tasks'
   });

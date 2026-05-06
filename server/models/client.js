@@ -19,7 +19,18 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    custom_number: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
   }, {
+    hooks: {
+      beforeCreate: async (client) => {
+        const count = await sequelize.models.client.count();
+        client.custom_number = `CL-${(count + 1).toString().padStart(3, '0')}`;
+      },
+    },
     underscored: true,
     tableName: 'clients'
   });

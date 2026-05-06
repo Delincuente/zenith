@@ -26,6 +26,7 @@ import CreateTaskModal from '../components/CreateTaskModal';
 import CreateProjectModal from '../components/CreateProjectModal';
 import ConfirmModal from '../components/ConfirmModal';
 import StatusDropdown from '../components/StatusDropdown';
+import ProjectStatusDropdown from '../components/ProjectStatusDropdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ProjectDetail = () => {
@@ -77,6 +78,16 @@ const ProjectDetail = () => {
     try {
       await axiosInstance.put(`/tasks/${taskId}`, { status: newStatus });
       fetchProjectDetails();
+    } catch (err) {
+      // Global interceptor handles the toast
+    }
+  };
+
+  const handleProjectStatusUpdate = async (newStatus) => {
+    try {
+      await axiosInstance.put(`/projects/${id}`, { status: newStatus });
+      fetchProjectDetails();
+      toast.success(`Project marked as ${newStatus}`);
     } catch (err) {
       // Global interceptor handles the toast
     }
@@ -165,12 +176,11 @@ const ProjectDetail = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center space-x-3">
-               <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
-                 project.status === 'active' ? 'bg-blue-500/10 border-blue-500/50 text-blue-500' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500'
-               }`}>
-                 {project.status}
-               </div>
-               <span className="text-slate-600 text-xs font-bold uppercase tracking-widest">Project ID: #{project.id.slice(0, 8)}</span>
+               <ProjectStatusDropdown 
+                 value={project.status} 
+                 onChange={handleProjectStatusUpdate} 
+               />
+               <span className="text-slate-600 text-xs font-bold uppercase tracking-widest">Project Number: {project.custom_number || `#${project.id.slice(0, 8)}`}</span>
             </div>
             <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">{project.title}</h1>
           </div>
@@ -350,6 +360,7 @@ const ProjectDetail = () => {
                         </div>
                         <div className="min-w-0">
                           <h4 className={`text-sm md:text-base font-bold text-white truncate ${task.status === 'done' ? 'line-through text-slate-600 opacity-50' : ''}`}>
+                            <span className="text-slate-500 mr-2 text-[10px] md:text-xs">{task.custom_number || `#${task.id.slice(0, 8)}`}</span>
                             {task.title}
                           </h4>
                           <p className="text-[10px] md:text-xs text-slate-500 mt-1 uppercase tracking-wider font-bold">

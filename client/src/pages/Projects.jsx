@@ -71,6 +71,17 @@ const Projects = () => {
   };
 
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'active': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'completed': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'on_hold': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+      case 'cancelled': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      default: return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+    }
+  };
+
+
   return (
     <div className="space-y-4 md:space-y-8 animate-in slide-in-from-bottom-4 duration-500" onClick={() => setActiveMenu(null)}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
@@ -178,8 +189,16 @@ const Projects = () => {
                   {project.title.charAt(0)}
                 </div>
                 <div>
-                  <h4 className="text-sm md:text-base text-white font-bold group-hover:text-blue-400 transition-colors truncate pr-6">{project.title}</h4>
-                  <p className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wider font-bold">{project.Client?.company_name || 'Individual'}</p>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">{project.custom_number || `#${project.id.slice(0, 8)}`}</span>
+                    <h4 className="text-sm md:text-base text-white font-bold group-hover:text-blue-400 transition-colors truncate pr-6">{project.title}</h4>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wider font-bold">{project.Client?.company_name || 'Individual'}</p>
+                    <span className={`text-[8px] px-1.5 py-0.5 rounded-full border font-black uppercase tracking-tighter ${getStatusColor(project.status)}`}>
+                      {project.status}
+                    </span>
+                  </div>
                 </div>
               </div>
 

@@ -168,7 +168,10 @@ const Clients = () => {
                           <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold">
                             {client.company_name.charAt(0)}
                           </div>
-                          <span className="text-white font-medium">{client.company_name}</span>
+                          <div className="flex flex-col">
+                            <span className="text-white font-medium">{client.company_name}</span>
+                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{client.custom_number || `#${client.id.slice(0, 8)}`}</span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-5 text-slate-400">
