@@ -17,7 +17,7 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated, project = null 
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const isEditing = !!project;
+  const isEditing = !!project?.id;
 
   useEffect(() => {
     if (isOpen) {

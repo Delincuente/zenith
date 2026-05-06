@@ -14,7 +14,8 @@ const CustomSelect = ({
   error, 
   icon: Icon,
   className = "",
-  id 
+  id,
+  disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -42,14 +43,16 @@ const CustomSelect = ({
       
       <div 
         id={id}
-        tabIndex={0}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`relative group cursor-pointer flex items-center bg-slate-800/40 border transition-all duration-300 outline-none ${
+        tabIndex={disabled ? -1 : 0}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className={`relative group flex items-center bg-slate-800/40 border transition-all duration-300 outline-none ${
+          disabled ? 'cursor-not-allowed opacity-60 border-slate-800' : 'cursor-pointer'
+        } ${
           error 
             ? 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.2)]' 
-            : 'border-slate-700/50 hover:border-slate-600'
+            : 'border-slate-700/50 ' + (!disabled ? 'hover:border-slate-600' : '')
         } rounded-2xl text-white py-4 ${Icon ? 'pl-12' : 'pl-5'} pr-10 ${
-          isOpen ? 'ring-4 ring-blue-500/10 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.1)]' : 'focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
+          isOpen ? 'ring-4 ring-blue-500/10 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.1)]' : (!disabled ? 'focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500' : '')
         }`}
       >
         {Icon && (
@@ -67,12 +70,14 @@ const CustomSelect = ({
         </span>
         
         <span className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-          <motion.div 
-            animate={{ rotate: isOpen ? 180 : 0, color: isOpen ? '#3b82f6' : '#64748b' }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <ChevronDown size={18} />
-          </motion.div>
+          {!disabled && (
+            <motion.div 
+              animate={{ rotate: isOpen ? 180 : 0, color: isOpen ? '#3b82f6' : '#64748b' }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <ChevronDown size={18} />
+            </motion.div>
+          )}
         </span>
       </div>
 

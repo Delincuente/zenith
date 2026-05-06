@@ -5,7 +5,7 @@ import { X, CheckSquare, Briefcase, AlertCircle, Type, AlignLeft } from 'lucide-
 import CustomSelect from './CustomSelect';
 import { focusFirstError } from '../utils/formUtils';
 
-const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, task = null }) => {
+const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, task = null, isProjectContext = false }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -16,7 +16,8 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, task = null }) => {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const isEditing = !!task;
+  const isEditing = !!task?.id;
+  const isProjectFixed = isProjectContext || (!!task?.project_id && !isEditing);
 
   useEffect(() => {
     if (isOpen) {
@@ -112,8 +113,8 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, task = null }) => {
 
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">{isEditing ? 'Edit Task' : 'Generate New Task'}</h2>
-                <p className="text-slate-400 text-sm md:text-base mt-1">{isEditing ? 'Update the details of your task.' : 'Assign a new task to your active projects.'}</p>
+                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">{isEditing ? 'Edit Task' : 'Add New Task'}</h2>
+                <p className="text-slate-400 text-sm md:text-base mt-1">{isEditing ? 'Update the details of your task.' : 'Create a new task and assign it to a project.'}</p>
               </div>
               <button onClick={onClose} className="hidden lg:flex text-slate-500 hover:text-white transition-colors bg-slate-800/50 p-2 rounded-xl">
                 <X size={20} />
@@ -137,6 +138,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, task = null }) => {
                 value={formData.project_id}
                 onChange={(val) => setFormData({ ...formData, project_id: val })}
                 error={fieldErrors.project_id}
+                disabled={isProjectFixed}
               />
 
               <div>
@@ -188,7 +190,7 @@ const CreateTaskModal = ({ isOpen, onClose, onTaskCreated, task = null }) => {
                   {loading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
                   ) : (
-                    <span>{isEditing ? 'Save Changes' : 'Generate Task'}</span>
+                    <span>{isEditing ? 'Save Changes' : 'Create Task'}</span>
                   )}
                 </button>
               </div>

@@ -4,6 +4,7 @@ import axiosInstance from '../api/axiosInstance';
 import { projectService } from '../api';
 import { 
   ChevronLeft, 
+  ChevronRight,
   Calendar, 
   User, 
   Briefcase, 
@@ -16,7 +17,8 @@ import {
   Trash2,
   MoreVertical,
   Layers,
-  ArrowRight
+  ArrowRight,
+  CheckSquare
 } from 'lucide-react';
 import { formatDate } from '../utils/dateFormatter';
 import toast from 'react-hot-toast';
@@ -36,6 +38,10 @@ const ProjectDetail = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [activeStatusId, setActiveStatusId] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
+  const [expandedTaskId, setExpandedTaskId] = useState(null);
+  const [deletingTaskId, setDeletingTaskId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const statusColors = {
     todo: 'bg-slate-500/10 text-slate-400',
@@ -75,14 +81,34 @@ const ProjectDetail = () => {
       // Global interceptor handles the toast
     }
   };
+  
+  const openEditTaskModal = (task) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+    setActiveMenu(null);
+  };
 
-  const handleDeleteTask = async (taskId) => {
+  const toggleExpand = (taskId) => {
+    setExpandedTaskId(expandedTaskId === taskId ? null : taskId);
+    setActiveMenu(null);
+    setActiveStatusId(null);
+  };
+
+  const openDeleteConfirm = (taskId) => {
+    setDeletingTaskId(taskId);
+    setActiveMenu(null);
+  };
+
+  const handleDeleteTask = async () => {
+    if (!deletingTaskId) return;
     try {
-      await axiosInstance.delete(`/tasks/${taskId}`);
+      await axiosInstance.delete(`/tasks/${deletingTaskId}`);
       toast.success('Task deleted successfully');
       fetchProjectDetails();
     } catch (err) {
       // Global interceptor handles the toast
+    } finally {
+      setDeletingTaskId(null);
     }
   };
 
@@ -109,12 +135,17 @@ const ProjectDetail = () => {
   const tasks = project.tasks || [];
   const stats = {
     total: tasks.length,
-    completed: tasks.filter(t => t.status === 'done').length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
     todo: tasks.filter(t => t.status === 'todo').length,
+    inProgress: tasks.filter(t => t.status === 'in_progress').length,
+    review: tasks.filter(t => t.status === 'review').length,
+    done: tasks.filter(t => t.status === 'done').length,
   };
 
-  const progress = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+  const filteredTasks = statusFilter === 'all' 
+    ? tasks 
+    : tasks.filter(t => t.status === statusFilter);
+
+  const progress = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
 
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500" onClick={() => {
@@ -158,7 +189,10 @@ const ProjectDetail = () => {
               <Trash2 size={18} />
             </button>
             <button 
-              onClick={() => setIsTaskModalOpen(true)}
+              onClick={() => {
+                setEditingTask({ project_id: id });
+                setIsTaskModalOpen(true);
+              }}
               className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/25 active:scale-95"
             >
               <Plus size={18} />
@@ -177,7 +211,7 @@ const ProjectDetail = () => {
             <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6">Project Progress</h3>
             <div className="flex items-end justify-between mb-4">
               <span className="text-5xl font-black text-white">{progress}%</span>
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">{stats.completed}/{stats.total} Tasks Done</span>
+              <span className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">{stats.done}/{stats.total} Tasks Done</span>
             </div>
             <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
               <motion.div 
@@ -238,26 +272,55 @@ const ProjectDetail = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">Project Tasks</h2>
-            <div className="flex space-x-2">
-               <div className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                 {stats.todo} To Do
-               </div>
-               <div className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-[10px] font-bold text-blue-500 uppercase tracking-widest">
-                 {stats.inProgress} Active
-               </div>
+            <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-2xl overflow-x-auto no-scrollbar scroll-smooth gap-1">
+               <button
+                 onClick={(e) => { e.stopPropagation(); setStatusFilter('all'); }}
+                 className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex items-center space-x-2 ${
+                   statusFilter === 'all' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                 }`}
+               >
+                 <span>All</span>
+                 <span className={`px-1.5 py-0.5 rounded-md text-[8px] ${statusFilter === 'all' ? 'bg-white/20' : 'bg-slate-800'}`}>{stats.total}</span>
+               </button>
+               {[
+                 { id: 'todo', label: 'To Do', count: stats.todo, color: 'text-slate-400' },
+                 { id: 'in_progress', label: 'Active', count: stats.inProgress, color: 'text-blue-500' },
+                 { id: 'review', label: 'Review', count: stats.review, color: 'text-purple-500' },
+                 { id: 'done', label: 'Done', count: stats.done, color: 'text-emerald-500' }
+               ].map(s => (
+                 <button
+                   key={s.id}
+                   onClick={(e) => { e.stopPropagation(); setStatusFilter(s.id); }}
+                   className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex items-center space-x-2 ${
+                     statusFilter === s.id 
+                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                       : `${s.color} hover:bg-slate-800/50`
+                   }`}
+                 >
+                   <span>{s.label}</span>
+                   <span className={`px-1.5 py-0.5 rounded-md text-[8px] ${statusFilter === s.id ? 'bg-white/20' : 'bg-slate-800'}`}>{s.count}</span>
+                 </button>
+               ))}
             </div>
           </div>
 
           <div className="space-y-3">
-            {tasks.length === 0 ? (
+            {filteredTasks.length === 0 ? (
               <div className="text-center py-20 bg-slate-900/50 border-2 border-dashed border-slate-800 rounded-3xl">
                 <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-600">
                   <CheckSquare size={32} />
                 </div>
-                <h3 className="text-lg font-bold text-white">No tasks yet</h3>
-                <p className="text-slate-500 text-sm mt-1 mb-6">Get started by breaking down your project into tasks.</p>
+                <h3 className="text-lg font-bold text-white">No tasks found</h3>
+                <p className="text-slate-500 text-sm mt-1 mb-6">
+                  {statusFilter === 'all' 
+                    ? 'Get started by breaking down your project into tasks.' 
+                    : `No tasks matching the "${statusFilter.replace('_', ' ')}" filter.`}
+                </p>
                 <button 
-                  onClick={() => setIsTaskModalOpen(true)}
+                  onClick={() => {
+                    setEditingTask({ project_id: id });
+                    setIsTaskModalOpen(true);
+                  }}
                   className="text-blue-500 font-bold uppercase tracking-widest text-xs hover:text-blue-400 transition-colors inline-flex items-center space-x-2"
                 >
                   <span>Create first task</span>
@@ -265,8 +328,9 @@ const ProjectDetail = () => {
                 </button>
               </div>
             ) : (
-              tasks.map((task) => {
+              filteredTasks.map((task) => {
                 const StatusIcon = statusIcons[task.status] || Circle;
+                const isExpanded = expandedTaskId === task.id;
                 const isMenuOpen = activeMenu === task.id;
                 const isStatusOpen = activeStatusId === task.id;
                 const isAnyMenuOpen = isMenuOpen || isStatusOpen;
@@ -274,66 +338,90 @@ const ProjectDetail = () => {
                 return (
                   <div 
                     key={task.id}
-                    className={`bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-5 flex items-center justify-between gap-4 group transition-all hover:border-slate-700 ${isAnyMenuOpen ? 'z-50 relative' : 'z-0 relative'}`}
+                    className={`bg-slate-900 border border-slate-800 rounded-2xl flex flex-col group transition-all hover:border-slate-700 ${isExpanded ? 'ring-1 ring-blue-500/30' : ''} ${isAnyMenuOpen ? 'z-50 relative' : 'z-0 relative'}`}
                   >
-                    <div className="flex items-center space-x-4 min-w-0">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${statusColors[task.status]}`}>
-                        <StatusIcon size={20} />
+                    <div 
+                      className="p-4 md:p-5 flex items-center justify-between gap-4 cursor-pointer"
+                      onClick={() => toggleExpand(task.id)}
+                    >
+                      <div className="flex items-center space-x-4 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${statusColors[task.status]}`}>
+                          <StatusIcon size={20} />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className={`text-sm md:text-base font-bold text-white truncate ${task.status === 'done' ? 'line-through text-slate-600 opacity-50' : ''}`}>
+                            {task.title}
+                          </h4>
+                          <p className="text-[10px] md:text-xs text-slate-500 mt-1 uppercase tracking-wider font-bold">
+                            {formatDate(task.createdAt)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <h4 className={`text-sm md:text-base font-bold text-white truncate ${task.status === 'done' ? 'line-through text-slate-600 opacity-50' : ''}`}>
-                          {task.title}
-                        </h4>
-                        <p className="text-[10px] md:text-xs text-slate-500 mt-1 uppercase tracking-wider font-bold">
-                          {formatDate(task.createdAt)}
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center space-x-4">
-                      <div className="hidden sm:block" onClick={(e) => e.stopPropagation()}>
-                        <StatusDropdown 
-                          value={task.status}
-                          onChange={(newStatus) => handleStatusUpdate(task.id, newStatus)}
-                          onOpenChange={(isOpen) => {
-                            if (isOpen) setActiveMenu(null);
-                            setActiveStatusId(isOpen ? task.id : null);
-                          }}
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (activeMenu !== task.id) setActiveStatusId(null);
-                            setActiveMenu(activeMenu === task.id ? null : task.id);
-                          }}
-                          className={`p-2 rounded-lg transition-colors ${activeMenu === task.id ? 'bg-slate-800 text-white' : 'text-slate-600 hover:text-white hover:bg-slate-800/50'}`}
-                        >
-                          <MoreVertical size={18} />
-                        </button>
+                      <div className="flex items-center space-x-4">
+                        <div className="hidden sm:block" onClick={(e) => e.stopPropagation()}>
+                          <StatusDropdown 
+                            value={task.status}
+                            onChange={(newStatus) => handleStatusUpdate(task.id, newStatus)}
+                            onOpenChange={(isOpen) => {
+                              if (isOpen) setActiveMenu(null);
+                              setActiveStatusId(isOpen ? task.id : null);
+                            }}
+                          />
+                        </div>
+                        
+                        <div className="relative">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (activeMenu !== task.id) setActiveStatusId(null);
+                              setActiveMenu(activeMenu === task.id ? null : task.id);
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${activeMenu === task.id ? 'bg-slate-800 text-white' : 'text-slate-600 hover:text-white hover:bg-slate-800/50'}`}
+                          >
+                            <MoreVertical size={18} />
+                          </button>
 
-                        <AnimatePresence>
-                          {activeMenu === task.id && (
-                            <motion.div 
-                              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                              className="absolute right-0 mt-2 w-40 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-1.5 z-[100] backdrop-blur-xl"
-                            >
-                              <button 
-                                onClick={() => handleDeleteTask(task.id)}
-                                className="w-full px-4 py-2 text-[11px] font-bold text-red-500/70 hover:text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors"
+                          <AnimatePresence>
+                            {activeMenu === task.id && (
+                              <motion.div 
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                className="absolute right-0 mt-2 w-40 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-1.5 z-[100] backdrop-blur-xl"
                               >
-                                <Trash2 size={14} />
-                                <span>DELETE TASK</span>
-                              </button>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                                <button 
+                                  onClick={() => openEditTaskModal(task)}
+                                  className="w-full px-4 py-2 text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 flex items-center space-x-2 transition-colors"
+                                >
+                                  <Edit2 size={14} />
+                                  <span>EDIT TASK</span>
+                                </button>
+                                <button 
+                                  onClick={() => openDeleteConfirm(task.id)}
+                                  className="w-full px-4 py-2 text-[11px] font-bold text-red-500/70 hover:text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors border-t border-slate-800/50"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>DELETE TASK</span>
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                        <ChevronRight size={18} className={`text-slate-700 transition-transform duration-300 hidden md:block ${isExpanded ? 'rotate-90 text-blue-500' : ''}`} />
                       </div>
                     </div>
+
+                    {isExpanded && (
+                      <div className="px-4 md:px-5 pb-5 md:pb-6 pt-0 border-t border-slate-800/50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="mt-4 bg-slate-950/30 p-4 rounded-xl border border-slate-800/50">
+                          <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Description</h5>
+                          <p className="text-xs md:text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                            {task.description || 'No description provided for this task.'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -345,9 +433,13 @@ const ProjectDetail = () => {
       {/* Modals */}
       <CreateTaskModal 
         isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setEditingTask(null);
+        }}
         onTaskCreated={fetchProjectDetails}
-        task={{ project_id: id }} // Pre-select current project
+        task={editingTask}
+        isProjectContext={true}
       />
 
       <CreateProjectModal 
@@ -363,6 +455,16 @@ const ProjectDetail = () => {
         onConfirm={handleDeleteProject}
         title="Delete Project?"
         message={`Are you sure you want to delete "${project.title}"? This will permanently delete the project and all its associated tasks. This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        type="danger"
+      />
+
+      <ConfirmModal 
+        isOpen={!!deletingTaskId}
+        onClose={() => setDeletingTaskId(null)}
+        onConfirm={handleDeleteTask}
+        title="Delete Task?"
+        message="Are you sure you want to delete this task? This action cannot be undone."
         confirmText="Yes, Delete"
         type="danger"
       />
