@@ -18,6 +18,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import useDebounce from '../hooks/useDebounce';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosInstance';
+import { getDaysLeft } from '../utils/dateFormatter';
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -143,91 +144,117 @@ const Projects = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {projects.map((project) => (
-            <div 
-              key={project.id} 
-              onClick={() => navigate(`/projects/${project.id}`)}
-              className="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden cursor-pointer active:scale-[0.98]"
-            >
-              <div className="absolute top-0 right-0 p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                <div className="relative">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveMenu(activeMenu === project.id ? null : project.id);
-                    }}
-                    className={`p-2 rounded-lg transition-colors ${activeMenu === project.id ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-white hover:bg-slate-800/50'}`}
-                  >
-                    <MoreVertical size={18} className="md:w-5 md:h-5" />
-                  </button>
+          {projects.map((project) => {
+            const totalTasks = project.tasks?.length || 0;
+            const doneTasks = project.tasks?.filter(t => t.status === 'done').length || 0;
+            const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+            const teamMembers = Array.from(new Map(project.tasks?.filter(t => t.assignee).map(t => [t.assignee.id, t.assignee])).values());
 
-                  {activeMenu === project.id && (
-                    <div className="absolute right-0 mt-2 w-36 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-1.5 z-[100] backdrop-blur-xl">
-                      <button 
-                        onClick={() => openEditModal(project)}
-                        className="w-full px-4 py-2 text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 flex items-center space-x-2 transition-colors"
-                      >
-                        <Edit2 size={14} />
-                        <span>EDIT PROJECT</span>
-                      </button>
-                      <button 
-                        onClick={() => openDeleteConfirm(project)}
-                        className="w-full px-4 py-2 text-[11px] font-bold text-red-500/70 hover:text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors border-t border-slate-800/50"
-                      >
-                        <Trash2 size={14} />
-                        <span>DELETE</span>
-                      </button>
+            return (
+              <div 
+                key={project.id} 
+                onClick={() => navigate(`/projects/${project.id}`)}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden cursor-pointer active:scale-[0.98]"
+              >
+                <div className="absolute top-0 right-0 p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                  <div className="relative">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveMenu(activeMenu === project.id ? null : project.id);
+                      }}
+                      className={`p-2 rounded-lg transition-colors ${activeMenu === project.id ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-white hover:bg-slate-800/50'}`}
+                    >
+                      <MoreVertical size={18} className="md:w-5 md:h-5" />
+                    </button>
+
+                    {activeMenu === project.id && (
+                      <div className="absolute right-0 mt-2 w-36 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-1.5 z-[100] backdrop-blur-xl">
+                        <button 
+                          onClick={() => openEditModal(project)}
+                          className="w-full px-4 py-2 text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 flex items-center space-x-2 transition-colors"
+                        >
+                          <Edit2 size={14} />
+                          <span>EDIT PROJECT</span>
+                        </button>
+                        <button 
+                          onClick={() => openDeleteConfirm(project)}
+                          className="w-full px-4 py-2 text-[11px] font-bold text-red-500/70 hover:text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors border-t border-slate-800/50"
+                        >
+                          <Trash2 size={14} />
+                          <span>DELETE</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3 mb-3 md:mb-4">
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center font-bold text-[10px] md:text-xs ${
+                    project.status === 'active' ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
+                  }`}>
+                    {project.title.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">{project.custom_number || `#${project.id.slice(0, 8)}`}</span>
+                      <h4 className="text-sm md:text-base text-white font-bold group-hover:text-blue-400 transition-colors truncate pr-6">{project.title}</h4>
                     </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3 mb-3 md:mb-4">
-                <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center font-bold text-[10px] md:text-xs ${
-                  project.status === 'active' ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
-                }`}>
-                  {project.title.charAt(0)}
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">{project.custom_number || `#${project.id.slice(0, 8)}`}</span>
-                    <h4 className="text-sm md:text-base text-white font-bold group-hover:text-blue-400 transition-colors truncate pr-6">{project.title}</h4>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wider font-bold">{project.Client?.company_name || 'Individual'}</p>
-                    <span className={`text-[8px] px-1.5 py-0.5 rounded-full border font-black uppercase tracking-tighter ${getStatusColor(project.status)}`}>
-                      {project.status}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wider font-bold">{project.Client?.company_name || 'Individual'}</p>
+                      <span className={`text-[8px] px-1.5 py-0.5 rounded-full border font-black uppercase tracking-tighter ${getStatusColor(project.status)}`}>
+                        {project.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <p className="text-slate-400 text-xs md:text-sm line-clamp-2 md:line-clamp-3 mb-4 md:mb-6 min-h-[32px] md:min-h-[60px]">
-                {project.description || 'No description provided.'}
-              </p>
+                <p className="text-slate-400 text-xs md:text-sm line-clamp-2 md:line-clamp-3 mb-4 md:mb-6 min-h-[32px] md:min-h-[60px]">
+                  {project.description || 'No description provided.'}
+                </p>
 
-              <div className="space-y-3">
-                <div className="flex justify-between text-[10px] md:text-xs">
-                  <span className="text-slate-500">Progress</span>
-                  <span className="text-slate-300 font-medium">65%</span>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-[10px] md:text-xs">
+                    <span className="text-slate-500">Progress</span>
+                    <span className="text-slate-300 font-medium">{progress}%</span>
+                  </div>
+                  <div className="w-full h-1 md:h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                  </div>
                 </div>
-                <div className="w-full h-1 md:h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '65%' }}></div>
+
+                <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center text-slate-500 text-[10px] md:text-xs">
+                    <Clock size={12} className="mr-1.5 md:w-3.5 md:h-3.5" />
+                    <span>{getDaysLeft(project.deadline)}</span>
+                  </div>
+                  <div className="flex border border-slate-800 rounded-full p-0.5 md:p-1 bg-slate-950 min-h-[28px] items-center">
+                    {teamMembers.length > 0 ? (
+                      teamMembers.slice(0, 3).map((member, idx) => (
+                        <div 
+                          key={member.id} 
+                          className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[9px] md:text-[10px] text-white border-2 border-slate-950 ${idx > 0 ? '-ml-1.5 md:-ml-2' : ''}`}
+                          style={{ backgroundColor: `hsl(${(idx * 137) % 360}, 60%, 50%)` }}
+                          title={member.name}
+                        >
+                          {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-slate-800 flex items-center justify-center text-[9px] md:text-[10px] text-slate-500 border-2 border-slate-950">
+                        ?
+                      </div>
+                    )}
+                    {teamMembers.length > 3 && (
+                      <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-slate-800 flex items-center justify-center text-[9px] md:text-[10px] text-slate-400 border-2 border-slate-950 -ml-1.5 md:-ml-2">
+                        +{teamMembers.length - 3}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-slate-800 flex items-center justify-between">
-                <div className="flex items-center text-slate-500 text-[10px] md:text-xs">
-                  <Clock size={12} className="mr-1.5 md:w-3.5 md:h-3.5" />
-                  <span>2 days left</span>
-                </div>
-                <div className="flex border border-slate-800 rounded-full p-0.5 md:p-1 bg-slate-950">
-                   <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-blue-500 flex items-center justify-center text-[9px] md:text-[10px] text-white border-2 border-slate-950">JD</div>
-                   <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-purple-500 flex items-center justify-center text-[9px] md:text-[10px] text-white border-2 border-slate-950 -ml-1.5 md:-ml-2">AK</div>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

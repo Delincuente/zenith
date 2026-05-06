@@ -38,3 +38,25 @@ export const formatDate = (dateString) => {
     return 'N/A';
   }
 };
+
+/**
+ * Calculates days remaining until a deadline.
+ * @param {string|Date} deadline 
+ * @returns {string} Human readable days left
+ */
+export const getDaysLeft = (deadline) => {
+  if (!deadline) return 'No Deadline';
+  const target = new Date(deadline);
+  const now = new Date();
+  
+  // Set times to midnight for accurate day calculation
+  target.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  
+  const diffTime = target - now;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) return 'Overdue';
+  if (diffDays === 0) return 'Due Today';
+  return `${diffDays} days left`;
+};

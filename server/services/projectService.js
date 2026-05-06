@@ -45,7 +45,7 @@ const getProjects = async ({ status, search, page = 1, limit = 10 }, userId) => 
     order: [['created_at', 'DESC']],
     include: [
       { model: db.Client, attributes: ['company_name'] },
-      { model: db.Task, attributes: ['id', 'status'] },
+      { model: db.Task, attributes: ['id', 'status', 'assigned_to'], include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name'] }] },
     ],
   });
 
